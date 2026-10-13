@@ -1,0 +1,4228 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0b1120" />
+  <title>Shop Ops · Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230f172a%22%2F%3E%20%3Cpath%20d%3D%22M7%2020l4-9%204%209%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M17%2011v9%22%20stroke%3D%22%23f59e0b%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Ccircle%20cx%3D%2223%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22none%22%20stroke%3D%22%2322c55e%22%20stroke-width%3D%222.4%22%2F%3E%20%3C%2Fsvg%3E" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <style>
+/* =========================================================================
+   Shopline - maintenance dashboard styles
+   Themes: dark (default), light, and a high-contrast kiosk theme.
+   ========================================================================= */
+
+:root {
+  --bg: #0a1120;
+  --bg-2: #0e1628;
+  --panel: #121c33;
+  --panel-2: #16223d;
+  --border: #23324f;
+  --border-soft: #1b2942;
+  --text: #e7eefb;
+  --muted: #8ba1c2;
+  --accent: #38bdf8;
+  --accent-2: #0ea5e9;
+  --good: #22c55e;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --info: #60a5fa;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 30px rgba(2, 8, 23, 0.45);
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html[data-theme="light"] {
+  --bg: #eef2f9;
+  --bg-2: #e6ecf6;
+  --panel: #ffffff;
+  --panel-2: #f6f9fe;
+  --border: #d7e0ee;
+  --border-soft: #e6ecf6;
+  --text: #101a2c;
+  --muted: #5c6d88;
+  --accent: #0284c7;
+  --accent-2: #0369a1;
+  --shadow: 0 8px 24px rgba(15, 30, 60, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+button { font-family: inherit; }
+.muted { color: var(--muted); }
+.small { font-size: 12.5px; }
+.strong { font-weight: 600; }
+.spacer { flex: 1; }
+.icon { flex: none; }
+.inline-gap { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---------- app layout ---------- */
+.app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; overflow: hidden; }
+.main { display: flex; flex-direction: column; min-width: 0; }
+
+.sidebar {
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  border-right: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; padding: 14px 12px; gap: 8px; overflow-y: auto;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 8px 8px 14px; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), #6366f1); color: #06101f;
+}
+.brand-name { font-weight: 700; letter-spacing: -0.02em; }
+.brand-tag { font-size: 11.5px; color: var(--muted); }
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 11px; padding: 9px 11px; border-radius: var(--radius-sm);
+  text-decoration: none; color: var(--muted); font-weight: 500; font-size: 14px; transition: background .12s, color .12s;
+}
+.nav-item:hover { background: var(--panel); color: var(--text); }
+.nav-item.active { background: var(--panel-2); color: var(--text); box-shadow: inset 2px 0 0 var(--accent); }
+.nav-item.active .icon { color: var(--accent); }
+.nav-badge {
+  margin-left: auto; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+}
+.nav-badge.bad { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
+.nav-badge.warn { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); }
+.sidebar-foot { margin-top: auto; padding: 10px; border-top: 1px solid var(--border-soft); }
+
+/* ---------- topbar ---------- */
+.topbar {
+  position: relative; display: flex; align-items: center; gap: 14px; padding: 12px 18px;
+  border-bottom: 1px solid var(--border-soft); background: var(--bg-2);
+}
+.topbar-title h1 { font-size: 17px; margin: 0; letter-spacing: -0.02em; }
+.topbar-title p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.menu-btn { display: none; }
+
+.global-search {
+  display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 999px; padding: 7px 14px; width: min(360px, 34vw); color: var(--muted);
+}
+.global-search input { border: none; background: transparent; outline: none; color: var(--text); width: 100%; font-size: 14px; }
+
+.conn { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); }
+.conn-text { display: flex; flex-direction: column; line-height: 1.15; }
+.conn-text span:first-child { font-size: 12.5px; font-weight: 600; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); display: inline-block; }
+.dot.ok { background: var(--good); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18); animation: softpulse 2.4s infinite; }
+.dot.bad { background: var(--bad); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18); }
+@keyframes softpulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+/* ---------- content ---------- */
+.content { flex: 1; overflow-y: auto; padding: 20px 22px 60px; }
+.view { display: flex; flex-direction: column; gap: 16px; max-width: 1600px; margin: 0 auto; }
+.view-body { display: flex; flex-direction: column; gap: 16px; }
+
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.section-head h2 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+.section-head p { margin: 2px 0 0; font-size: 13px; }
+.section-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 13.5px; font-weight: 600;
+  cursor: pointer; transition: transform .06s, background .12s, border-color .12s;
+}
+.btn:hover { background: var(--panel-2); border-color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: #041022; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { background: transparent; }
+.btn.danger { background: var(--bad); border-color: transparent; color: #fff; }
+.btn.ghost-soft { background: rgba(239, 68, 68, 0.12); color: #fca5a5; border-color: rgba(239, 68, 68, 0.35); }
+
+.icon-btn {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 7px;
+  border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; transition: background .12s, color .12s;
+}
+.icon-btn:hover { background: var(--panel); color: var(--text); }
+.icon-btn.tiny { width: 24px; height: 24px; }
+.icon-btn.danger-hover:hover { color: #fca5a5; background: rgba(239, 68, 68, 0.12); }
+
+.mini-btn {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 8px;
+  border-radius: 7px; border: 1px solid var(--border); background: var(--panel-2); color: var(--good); cursor: pointer;
+}
+.mini-btn:hover { border-color: var(--good); }
+
+.segmented { display: inline-flex; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; gap: 2px; }
+.seg { display: inline-flex; align-items: center; gap: 6px; border: none; background: transparent; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.seg.active { background: var(--panel-2); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+
+.check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); cursor: pointer; }
+
+/* ---------- inputs ---------- */
+.input {
+  background: var(--panel); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm);
+  padding: 8px 11px; font-size: 14px; outline: none; width: 100%; transition: border-color .12s, box-shadow .12s;
+}
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16); }
+.input.compact { width: auto; padding: 8px 10px; }
+textarea.input { resize: vertical; font-family: inherit; }
+select.input { cursor: pointer; }
+
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.search-wrap { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 10px; color: var(--muted); min-width: 240px; }
+.search-wrap:focus-within { border-color: var(--accent); }
+.search-input { border: none; background: transparent; padding: 8px 0; }
+
+/* ---------- chips / badges ---------- */
+.chip {
+  display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  color: var(--chip, var(--accent)); background: color-mix(in srgb, var(--chip, var(--accent)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--chip, var(--accent)) 42%, transparent); white-space: nowrap;
+}
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--border); color: var(--muted); }
+.badge.bad { color: #fca5a5; background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.38); }
+.badge.warn { color: #fcd34d; background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.38); }
+.badge.info { color: #93c5fd; background: rgba(96,165,250,.12); border-color: rgba(96,165,250,.38); }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--panel-2); color: var(--muted); letter-spacing: .03em; }
+.tag.wo { color: var(--info); }
+.tag.pm { color: var(--warn); }
+
+/* ---------- panels ---------- */
+.panel { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; }
+.panel-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; border-bottom: 1px solid var(--border-soft); }
+.panel-head h3 { margin: 0; font-size: 14.5px; font-weight: 600; }
+.panel-head .icon { color: var(--accent); }
+.panel-body { padding: 16px; }
+.panel-foot { padding: 12px 16px; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+
+/* ---------- kpi ---------- */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi-row-5 { grid-template-columns: repeat(5, 1fr); }
+.kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
+.mini-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.mini-kpis-3 { grid-template-columns: repeat(3, 1fr); }
+.kpi { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 14px 16px; position: relative; overflow: hidden; }
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .7; }
+.kpi.bad::before { background: var(--bad); }
+.kpi.warn::before { background: var(--warn); }
+.kpi.accent::before { background: var(--accent); }
+.kpi.good::before { background: var(--good); }
+.kpi.good .kpi-value { color: #86efac; }
+.kpi-value { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.kpi-label { font-size: 12.5px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+.kpi-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+.kpi.bad .kpi-value { color: #fca5a5; }
+.kpi.warn .kpi-value { color: #fcd34d; }
+
+/* ---------- lists ---------- */
+.list { list-style: none; margin: 0; padding: 0; }
+.list-item { display: flex; align-items: center; gap: 11px; padding: 11px 16px; border-bottom: 1px solid var(--border-soft); cursor: pointer; transition: background .12s; }
+.list-item:hover { background: var(--panel-2); }
+.list-item:last-child { border-bottom: none; }
+.list-item.empty-ok { color: var(--muted); cursor: default; }
+.li-body { flex: 1; min-width: 0; }
+.li-title { font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pulse { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--muted); }
+.pulse.bad { background: var(--bad); box-shadow: 0 0 0 4px rgba(239,68,68,.14); }
+.pulse.warn { background: var(--warn); box-shadow: 0 0 0 4px rgba(245,158,11,.14); }
+
+.activity { list-style: none; margin: 0; padding: 4px 0; max-height: 420px; overflow-y: auto; }
+.activity li { display: flex; gap: 11px; padding: 9px 16px; }
+.activity .dot { width: 7px; height: 7px; margin-top: 6px; background: var(--accent); flex: none; }
+
+.bars { padding: 8px 4px; }
+.bar-row { display: grid; grid-template-columns: 120px 1fr 34px; align-items: center; gap: 12px; padding: 7px 12px; }
+.bar-label { font-size: 12.5px; color: var(--muted); }
+.bar-track { height: 10px; background: var(--bg-2); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+.bar-value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; }
+
+/* ---------- tables ---------- */
+.table-wrap { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.data-table th { position: sticky; top: 0; z-index: 1; background: var(--panel-2); text-align: left; padding: 11px 13px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table th.sortable { cursor: pointer; user-select: none; }
+.data-table th.sortable:hover { color: var(--text); }
+.data-table th.sorted { color: var(--accent); }
+.data-table th.wide { min-width: 240px; }
+.sort-arrow { margin-left: 5px; }
+.data-table td { padding: 9px 13px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+.data-table tbody tr:hover { background: var(--panel-2); }
+.data-table tr.row-bad td { background: rgba(239, 68, 68, 0.07); }
+.data-table tr.row-warn td { background: rgba(245, 158, 11, 0.06); }
+.data-table tr.flash td { animation: flash 1.6s ease; }
+@keyframes flash { 0% { background: rgba(56,189,248,.35); } 100% { background: transparent; } }
+.data-table td.editable { cursor: text; }
+.data-table td.editable:hover { box-shadow: inset 0 0 0 1px var(--border); }
+.data-table td.empty { text-align: center; color: var(--muted); padding: 34px; }
+.actions-col { text-align: right; white-space: nowrap; width: 1%; }
+.actions-col .icon-btn { display: inline-grid; }
+.inline-input { padding: 5px 8px; font-size: 13.5px; min-width: 90px; }
+.qty-pill { min-width: 34px; display: inline-block; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.path-cell { display: inline-flex; align-items: center; gap: 6px; max-width: 320px; }
+.path-text { font-family: var(--mono); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--info); }
+code.path-text { display: block; padding: 4px 8px; background: var(--bg-2); border-radius: 6px; margin-top: 4px; }
+
+/* ---------- kanban board ---------- */
+.board { display: grid; grid-template-columns: repeat(5, minmax(230px, 1fr)); gap: 14px; align-items: start; overflow-x: auto; }
+.board-col { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); display: flex; flex-direction: column; min-height: 180px; transition: border-color .12s, background .12s; }
+.board-col.over { border-color: var(--accent); background: rgba(56,189,248,.06); }
+.board-col-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--border-soft); }
+.board-col-head .count { font-size: 12px; font-weight: 700; color: var(--muted); background: var(--panel-2); padding: 1px 8px; border-radius: 999px; }
+.board-col-body { display: flex; flex-direction: column; gap: 9px; padding: 11px; flex: 1; }
+.board-empty { border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 18px; text-align: center; color: var(--muted); font-size: 12.5px; }
+.board-empty:not(:empty) { color: transparent; }
+.card { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px; cursor: grab; display: flex; flex-direction: column; gap: 7px; transition: border-color .12s, transform .1s; }
+.card:hover { border-color: var(--accent); }
+.card.dragging { opacity: .45; }
+.card-top { display: flex; justify-content: space-between; }
+.card-title { margin: 0; font-size: 13.5px; font-weight: 600; line-height: 1.35; }
+.card-bits { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-bit { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--muted); }
+
+/* ---------- modal / dialog ---------- */
+.overlay { position: fixed; inset: 0; background: rgba(4, 10, 22, 0.62); backdrop-filter: blur(3px); display: grid; place-items: center; z-index: 60; padding: 20px; animation: fade .15s ease; }
+@keyframes fade { from { opacity: 0; } }
+.dialog { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: min(680px, 96vw); max-height: 92vh; display: flex; flex-direction: column; box-shadow: var(--shadow); animation: pop .16s ease; }
+.dialog.small { width: min(420px, 96vw); }
+@keyframes pop { from { transform: translateY(8px) scale(.98); opacity: 0; } }
+.dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border-soft); }
+.dialog-head h3 { margin: 0; font-size: 16.5px; }
+.dialog-body { padding: 18px; overflow-y: auto; }
+.dialog-body p { margin: 0 0 6px; }
+.dialog-foot { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--border-soft); }
+.dialog-foot .spacer { flex: 1; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field-label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.field-label em { color: var(--bad); font-style: normal; }
+
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+.switch input { display: none; }
+.switch .track { width: 40px; height: 22px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--border); position: relative; transition: background .15s; }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.switch input:checked + .track { background: rgba(56,189,248,.3); border-color: var(--accent); }
+.switch input:checked + .track::after { transform: translateX(18px); background: var(--accent); }
+.switch-label { font-size: 13px; color: var(--muted); }
+
+/* ---------- toast ---------- */
+.toast-host { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 9px; z-index: 80; }
+.toast { display: flex; align-items: center; gap: 9px; background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--good); color: var(--text); padding: 11px 15px; border-radius: 10px; font-size: 13.5px; box-shadow: var(--shadow); animation: slidein .2s ease; }
+.toast.error { border-left-color: var(--bad); }
+.toast.error .icon { color: var(--bad); }
+.toast.ok .icon { color: var(--good); }
+.toast.out { opacity: 0; transform: translateX(12px); transition: all .3s; }
+@keyframes slidein { from { opacity: 0; transform: translateX(20px); } }
+
+/* ---------- global search results ---------- */
+.search-results { position: fixed; z-index: 50; }
+.search-panel { position: absolute; top: 64px; right: 20px; width: min(420px, 92vw); background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+.search-hit { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; padding: 10px 14px; background: transparent; border: none; border-bottom: 1px solid var(--border-soft); color: var(--text); cursor: pointer; font-size: 13.5px; }
+.search-hit:hover { background: var(--panel-2); }
+.search-hit .icon { color: var(--accent); }
+.hit-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hit-type { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.search-empty { padding: 14px; color: var(--muted); font-size: 13px; }
+.popover { position: absolute; top: 64px; right: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 6px; min-width: 210px; }
+.popover-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 11px; border: none; background: transparent; color: var(--text); border-radius: 8px; cursor: pointer; font-size: 13.5px; }
+.popover-item:hover { background: var(--panel-2); }
+.popover-item .icon { color: var(--accent); }
+
+/* ---------- settings rows ---------- */
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--border-soft); flex-wrap: wrap; }
+.setting-row:last-child { border-bottom: none; }
+.row-actions { display: flex; align-items: center; gap: 9px; }
+
+/* =========================================================================
+   KIOSK / wall board
+   ========================================================================= */
+html[data-theme="kiosk"] {
+  --bg: #05080f;
+  --bg-2: #0a101d;
+  --panel: #0d1526;
+  --panel-2: #121d33;
+  --border: #1e2c47;
+  --border-soft: #17233a;
+  --text: #eaf1fb;
+  --muted: #8ea4c5;
+  --accent: #38bdf8;
+}
+.kiosk-body { height: 100vh; overflow: hidden; background: radial-gradient(circle at 20% -10%, #12203b, #05080f 60%); }
+.kiosk { height: 100vh; display: grid; grid-template-rows: auto 1fr auto; padding: 18px 22px; gap: 16px; }
+.kiosk-loading { color: var(--muted); font-size: 20px; margin: auto; }
+
+.kiosk-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.kiosk-brand { display: flex; align-items: center; gap: 14px; }
+.kiosk-logo { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), #6366f1); color: #041022; }
+.kiosk-shop { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+.kiosk-sub { font-size: 14px; color: var(--muted); }
+.kiosk-center { text-align: center; }
+.kiosk-view-title { font-size: 22px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.kiosk-dots { display: flex; gap: 7px; justify-content: center; margin-top: 8px; }
+.kdot { width: 9px; height: 9px; border-radius: 999px; background: var(--border); cursor: pointer; transition: all .2s; }
+.kdot.on { background: var(--accent); width: 26px; }
+.kiosk-right { text-align: right; }
+.kiosk-clock { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; line-height: 1; }
+.kiosk-date { font-size: 15px; color: var(--muted); margin-top: 4px; }
+.kiosk-live { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: .12em; margin-top: 8px; color: var(--good); }
+.kiosk-live.bad { color: var(--bad); }
+.kiosk-live .dot { width: 10px; height: 10px; }
+.kiosk-live.ok .dot { background: var(--good); animation: softpulse 2s infinite; }
+.kiosk-live.bad .dot { background: var(--bad); }
+
+.kiosk-main { overflow: hidden; }
+
+.k-overview { display: grid; grid-template-rows: auto 1fr; gap: 18px; height: 100%; }
+.k-tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.k-tile { background: var(--panel); border: 1px solid var(--border-soft); border-radius: 16px; padding: 18px 20px; position: relative; overflow: hidden; }
+.k-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.k-tile.bad::before { background: var(--bad); }
+.k-tile.warn::before { background: var(--warn); }
+.k-tile-value { font-size: 54px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.k-tile.bad .k-tile-value { color: #fca5a5; }
+.k-tile.warn .k-tile-value { color: #fcd34d; }
+.k-tile-label { font-size: 16px; color: var(--muted); margin-top: 8px; font-weight: 600; }
+
+.k-panel { background: var(--panel); border: 1px solid var(--border-soft); border-radius: 16px; padding: 6px 0; overflow: hidden; display: flex; flex-direction: column; }
+.k-panel.wide { height: 100%; }
+.k-panel-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; font-size: 20px; font-weight: 700; border-bottom: 1px solid var(--border-soft); }
+.k-panel-head .icon { color: var(--accent); }
+.k-list { list-style: none; margin: 0; padding: 0; overflow: hidden; }
+.k-list.big { overflow-y: auto; }
+.k-row { display: flex; align-items: center; gap: 16px; padding: 14px 22px; border-bottom: 1px solid var(--border-soft); }
+.k-row.bad { background: rgba(239,68,68,.06); }
+.k-row.warn { background: rgba(245,158,11,.05); }
+.k-row-body { flex: 1; min-width: 0; }
+.k-row-title { font-size: 20px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-row-sub { font-size: 14px; color: var(--muted); margin-top: 3px; }
+.k-row-owner { font-size: 15px; color: var(--muted); text-align: right; font-weight: 600; }
+.k-date { font-size: 16px; font-weight: 700; color: var(--accent); min-width: 74px; font-variant-numeric: tabular-nums; }
+.k-qty { font-size: 26px; font-weight: 800; min-width: 60px; text-align: center; color: var(--warn); font-variant-numeric: tabular-nums; }
+.k-row.bad .k-qty { color: #fca5a5; }
+.k-more { padding: 14px 22px; color: var(--muted); font-size: 15px; }
+
+.k-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; height: 100%; }
+.k-col { background: var(--panel); border: 1px solid var(--border-soft); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; }
+.k-col-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; font-size: 18px; font-weight: 700; border-bottom: 3px solid var(--chip, var(--accent)); color: var(--chip, var(--accent)); }
+.k-count { background: var(--panel-2); color: var(--muted); border-radius: 999px; padding: 1px 12px; font-size: 15px; }
+.k-col .k-card { margin: 12px 12px 0; }
+.k-card { background: var(--panel-2); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: 10px; padding: 13px 15px; }
+.k-card.bad { border-left-color: var(--bad); }
+.k-card-title { font-size: 16.5px; font-weight: 600; line-height: 1.3; }
+.k-card-meta { display: flex; align-items: center; gap: 10px; margin-top: 9px; }
+.k-chip { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; color: var(--chip); background: color-mix(in srgb, var(--chip) 16%, transparent); border: 1px solid color-mix(in srgb, var(--chip) 42%, transparent); }
+.k-due { font-size: 13px; color: var(--muted); }
+.k-card-sub { font-size: 13px; color: var(--muted); margin-top: 7px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.k-assets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; align-content: start; height: 100%; overflow-y: auto; }
+.k-asset { background: var(--panel); border: 1px solid var(--border-soft); border-left: 5px solid var(--good); border-radius: 14px; padding: 16px 18px; }
+.k-asset.bad { border-left-color: var(--bad); background: rgba(239,68,68,.06); }
+.k-asset.warn { border-left-color: var(--warn); background: rgba(245,158,11,.05); }
+.k-asset-top { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.k-dot { width: 11px; height: 11px; border-radius: 50%; }
+.k-asset-name { font-size: 20px; font-weight: 700; margin-top: 10px; }
+.k-asset-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+.kiosk-ticker { display: flex; align-items: center; gap: 16px; border-top: 1px solid var(--border); padding-top: 12px; overflow: hidden; }
+.ticker-label { font-size: 12px; font-weight: 800; letter-spacing: .16em; color: var(--accent); flex: none; }
+.ticker-track { flex: 1; overflow: hidden; position: relative; height: 22px; }
+.ticker-run { display: inline-flex; gap: 46px; white-space: nowrap; animation: marquee 40s linear infinite; position: absolute; }
+.ticker-item { font-size: 14px; color: var(--muted); }
+.ticker-item::before { content: "•"; color: var(--accent); margin-right: 10px; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1200px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row-5, .kpi-row-3 { grid-template-columns: repeat(3, 1fr); }
+  .k-tiles { grid-template-columns: repeat(3, 1fr); }
+  .k-board { grid-template-columns: repeat(3, 1fr); }
+  .k-assets { grid-template-columns: repeat(3, 1fr); }
+  .k-board2 { grid-template-columns: 1fr 1fr; }
+  .day-strip { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 70; transform: translateX(-100%); transition: transform .2s; }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow); }
+  .menu-btn { display: inline-grid; }
+  .global-search { display: none; }
+  .grid-2, .settings-grid, .mini-kpis, .mini-kpis-3 { grid-template-columns: 1fr; }
+  .board { grid-template-columns: repeat(2, minmax(200px, 1fr)); }
+  .k-tiles, .k-board, .k-assets { grid-template-columns: repeat(2, 1fr); }
+  .k-board2 { grid-template-columns: 1fr; }
+  .day-strip { grid-template-columns: 1fr; }
+  .weapon-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .kiosk-header { grid-template-columns: 1fr; text-align: center; }
+  .kiosk-right { text-align: center; }
+}
+
+/* =========================================================================
+   SHOP OPS — daily board, schedule, weapons, notes
+   ========================================================================= */
+
+.mono-time {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+
+/* ---------- daily board ---------- */
+.board-nav { margin-bottom: 0; }
+.board-day-label { font-size: 15px; font-weight: 700; color: var(--muted); margin-left: 4px; }
+.board-day-label.today { color: var(--good); letter-spacing: .06em; }
+
+.board-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.board-col { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); overflow: hidden; min-height: 220px; }
+.board-col-title {
+  display: flex; align-items: center; gap: 10px; padding: 13px 16px;
+  font-size: 15px; font-weight: 800; letter-spacing: .08em; border-bottom: 3px solid var(--border-soft);
+}
+.board-col-title.in { color: #86efac; border-bottom-color: rgba(34, 197, 94, .55); }
+.board-col-title.out { color: #fca5a5; border-bottom-color: rgba(239, 68, 68, .55); }
+.board-col-title .icon { flex: none; }
+.board-col-title .count { margin-left: auto; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 11px; font-size: 13px; color: var(--muted); }
+.col-sub { margin-left: 8px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+.board-col-body { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.board-empty-day { border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 26px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+.col-day-sep {
+  display: flex; align-items: center; gap: 10px; margin: 4px 0 -3px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.col-day-sep::before, .col-day-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
+.col-day-sep.today { color: var(--good); }
+
+.appt {
+  background: var(--panel-2); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 11px 13px; display: flex; flex-direction: column; gap: 7px;
+}
+.appt.dim { opacity: .62; }
+.appt-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.appt-time { font-size: 17px; font-weight: 700; color: var(--text); }
+.appt-unit { font-size: 15.5px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.appt-items { list-style: none; margin: 0; padding: 0 0 0 2px; display: flex; flex-direction: column; gap: 3px; }
+.appt-items li { font-size: 13.5px; color: var(--text); }
+.appt-items b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.appt-notes { font-size: 12.5px; color: var(--muted); background: var(--bg-2); border-radius: 6px; padding: 6px 9px; }
+.appt-actions { display: flex; align-items: center; gap: 7px; margin-top: 2px; flex-wrap: wrap; }
+
+.mini-btn.good { color: #86efac; }
+.mini-btn.good:hover { border-color: var(--good); }
+.mini-btn.danger { color: #fca5a5; background: rgba(239, 68, 68, .1); border-color: rgba(239, 68, 68, .35); }
+.mini-btn.danger:hover { border-color: var(--bad); }
+
+.overdue-banner { background: rgba(239, 68, 68, .07); border: 1px solid rgba(239, 68, 68, .4); border-radius: var(--radius); padding: 12px 16px; }
+.overdue-head { display: flex; align-items: center; gap: 10px; font-weight: 800; color: #fca5a5; font-size: 14px; letter-spacing: .04em; margin-bottom: 8px; }
+.overdue-head .icon { color: var(--bad); }
+.overdue-list { display: flex; flex-direction: column; gap: 6px; }
+.overdue-row { display: flex; align-items: center; gap: 10px; background: var(--panel-2); border: 1px solid var(--border-soft); border-radius: 8px; padding: 7px 11px; font-size: 13.5px; }
+.overdue-more { padding: 2px 4px; }
+
+/* ---------- week strip ---------- */
+.week-nav { align-items: center; }
+.day-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: start; }
+.day-card { background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+.day-card.today { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56, 189, 248, .14); }
+.day-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 6px; border-bottom: 1px solid var(--border-soft); }
+.day-card.today .day-head { border-bottom-color: rgba(56, 189, 248, .4); }
+.day-name { font-size: 12.5px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.day-card.today .day-name { color: var(--accent); }
+.day-head .count { font-size: 12px; font-weight: 700; background: var(--panel-2); border-radius: 999px; padding: 0 8px; }
+.day-head .count.zero { color: var(--muted); opacity: .6; }
+.day-chip {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left;
+  background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--chip, var(--accent));
+  border-radius: 7px; padding: 6px 8px; cursor: pointer; color: var(--text); transition: border-color .12s, background .12s;
+}
+.day-chip:hover { border-color: var(--chip, var(--accent)); background: var(--panel); }
+.day-chip.dim { opacity: .55; }
+.day-chip-time { font-size: 12px; font-weight: 700; color: var(--chip, var(--accent)); }
+.day-chip-unit { font-size: 12.5px; font-weight: 600; line-height: 1.25; padding-right: 18px; }
+.day-chip-items { font-size: 10.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.day-chip .icon { position: absolute; right: 6px; top: 6px; color: var(--chip, var(--accent)); opacity: .8; }
+.day-empty { color: var(--border); text-align: center; margin-top: auto; }
+
+/* ---------- weapons ---------- */
+.weapon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.weapon-card {
+  background: var(--panel); border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 8px; transition: border-color .12s;
+}
+.weapon-card:hover { border-color: var(--accent); }
+.weapon-name { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14.5px; }
+.weapon-name .icon { color: var(--accent); }
+.weapon-count { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--accent); }
+.weapon-notes { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.weapon-actions { display: flex; align-items: center; gap: 5px; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border-soft); }
+
+/* ---------- notes ---------- */
+.note-composer { display: flex; gap: 10px; align-items: flex-start; }
+.note-composer .input { flex: 1; }
+.notes-list { display: flex; flex-direction: column; gap: 10px; }
+.note-card {
+  background: var(--panel); border: 1px solid var(--border-soft); border-left: 4px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 11px 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.note-card.wide { border-left-width: 5px; }
+.note-text { font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+.note-foot { display: flex; align-items: center; gap: 8px; }
+.note-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+
+/* ---------- equipment items editor ---------- */
+.items-editor { display: flex; flex-direction: column; gap: 8px; }
+.items-rows { display: flex; flex-direction: column; gap: 6px; }
+.item-row { display: grid; grid-template-columns: 1.2fr 74px 1.6fr 30px; gap: 6px; align-items: center; }
+.item-row .input { padding: 7px 9px; font-size: 13.5px; }
+.items-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn.mini { padding: 5px 10px; font-size: 12.5px; }
+.items-cell { font-size: 13px; }
+.eqtype-wrap { margin-top: 12px; max-height: 180px; overflow-y: auto; }
+.eqtype-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.eqtype-chip {
+  display: inline-flex; align-items: center; gap: 2px; padding: 4px 6px 4px 11px; border-radius: 999px;
+  background: var(--panel-2); border: 1px solid var(--border); font-size: 12.5px; font-weight: 600;
+}
+
+/* ---------- TBD time & welcome panel ---------- */
+.time-control { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.time-control .input[type="time"] { max-width: 170px; }
+.appt-time.tbd { color: var(--warn); font-size: 14px; letter-spacing: .06em; }
+.welcome .welcome-tips { margin: 0 0 16px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.welcome .welcome-tips li { font-size: 14px; line-height: 1.5; color: var(--text); }
+.welcome .welcome-tips code { font-family: var(--mono); font-size: 12.5px; background: var(--bg-2); padding: 1px 6px; border-radius: 5px; color: var(--info); }
+.welcome .row-actions { flex-wrap: wrap; }
+
+.data-table tr.row-done td { opacity: .55; }
+
+/* =========================================================================
+   KIOSK additions
+   ========================================================================= */
+.k-tiles-6 { grid-template-columns: repeat(6, 1fr); }
+.k-board2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: start; overflow: hidden; }
+.k-col2 .k-col-head { font-size: 20px; letter-spacing: .1em; }
+.k-col-sub { padding: 8px 20px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border-soft); }
+.k-col2 .k-card, .k-col2 .k-appt { margin: 12px 14px 0; }
+.k-appt {
+  background: var(--panel-2); border: 1px solid var(--border); border-left: 5px solid var(--accent);
+  border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.k-appt.bad { border-left-color: var(--bad); }
+.k-appt.dim { opacity: .55; }
+.k-appt-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.k-appt-time { font-size: 24px; font-weight: 800; color: var(--accent); }
+.k-appt-unit { font-size: 21px; font-weight: 700; }
+.k-appt-items { display: flex; flex-direction: column; gap: 2px; font-size: 15px; }
+.k-appt-items b { color: var(--accent); }
+.k-appt-notes { font-size: 13px; color: var(--muted); background: var(--bg-2); border-radius: 8px; padding: 7px 10px; }
+.k-appt-date { margin-left: auto; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.k-overdue-bar {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 12px;
+  background: rgba(239, 68, 68, .1); border: 1px solid rgba(239, 68, 68, .45); border-radius: 12px;
+  padding: 12px 18px; color: #fca5a5; font-weight: 700; font-size: 15px; letter-spacing: .02em;
+}
+.k-overdue-bar .icon { color: var(--bad); flex: none; }
+.k-day-row { padding: 12px 22px 4px; font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.k-notes .k-note-num { font-size: 22px; font-weight: 800; color: var(--accent); min-width: 34px; text-align: right; }
+.k-note-text { font-size: 19px; line-height: 1.4; white-space: pre-wrap; }
+.k-weapons { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; align-content: start; overflow-y: auto; }
+.k-weapon {
+  background: var(--panel); border: 1px solid var(--border-soft); border-left: 5px solid var(--accent);
+  border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px;
+}
+.k-weapon-name { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; }
+.k-weapon-name .icon { color: var(--accent); }
+.k-weapon-count { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; color: var(--accent); }
+.k-weapon-notes { font-size: 13px; color: var(--muted); }
+.k-weapon-total {
+  grid-column: 1 / -1; background: var(--panel); border: 1px solid var(--border-soft); border-radius: 14px;
+  padding: 16px 22px; display: flex; align-items: baseline; gap: 18px;
+}
+.k-weapon-total-value { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.k-weapon-total-label { font-size: 14px; font-weight: 700; letter-spacing: .14em; color: var(--muted); }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" class="sidebar"></aside>
+    <div class="main">
+      <header id="topbar" class="topbar"></header>
+      <main id="content" class="content"></main>
+    </div>
+  </div>
+
+  <div id="search-results" class="search-results" role="listbox"></div>
+  <script type="module">
+// ═══════════════ shared/schema.js ═══════════════
+const __mod_shared_schema_js = (() => {
+
+// Single source of truth for the data model.
+// Imported by the Node server (for validation + type coercion) and by the
+// browser client (for rendering tables, forms and boards).
+//
+// The shop runs on four core collections:
+//   appointments - scheduled drop-offs / pickups, by unit + equipment type
+//   units        - the roster of units that visit the shop (with POCs)
+//   weapons      - arms-room inventory, counted by weapon type
+//   notes        - the shop notes board
+// plus `eqtypes`, the equipment-type dictionary used for suggestions.
+
+const TYPES = {
+  TEXT: 'text',
+  TEXTAREA: 'textarea',
+  NUMBER: 'number',
+  CURRENCY: 'currency',
+  DATE: 'date',
+  TIME: 'time',
+  SELECT: 'select',
+  REF: 'ref', // reference to another collection
+  BOOL: 'bool',
+  URL: 'url',
+  EMAIL: 'email',
+  TEL: 'tel',
+  ITEMS: 'items', // nested list of equipment lines on an appointment
+};
+
+// Flow of goods: a unit brings equipment IN (drop-off) or collects it back
+// (pickup). Life-cycle of an appointment on the board.
+const DIRECTIONS = ['Drop-off', 'Pickup'];
+const STATUSES = ['Scheduled', 'Arrived', 'Completed', 'No-show', 'Cancelled'];
+
+// A small palette used for status/direction chips in the UI.
+const COLORS = {
+  // appointment status
+  Scheduled: '#0ea5e9',
+  Arrived: '#f59e0b',
+  Completed: '#22c55e',
+  'No-show': '#ef4444',
+  Cancelled: '#64748b',
+  // flow direction
+  'Drop-off': '#22c55e',
+  Pickup: '#ef4444',
+};
+
+const collections = [
+  {
+    name: 'appointments',
+    label: 'Appointments',
+    singular: 'Appointment',
+    icon: 'calendar',
+    primary: 'unitId',
+    titleOf: (r) => {
+      const when = [r.date, r.time].filter(Boolean).join(' ');
+      return `${when} · ${r.unitName || 'Unit'} · ${r.direction || ''}`.trim();
+    },
+    defaultSort: { key: 'date', dir: 'asc' },
+    statusKey: 'status',
+    cardBits: [
+      { key: 'direction', chip: true },
+      { key: 'time', icon: 'clock' },
+      { key: 'items', items: true },
+    ],
+    fields: [
+      { key: 'date', label: 'Date', type: TYPES.DATE, required: true, showDue: true },
+      { key: 'time', label: 'Time', type: TYPES.TIME, default: '09:00', tbd: true },
+      { key: 'unitId', label: 'Unit', type: TYPES.REF, ref: 'units', refLabel: 'name', required: true, resolveByName: true, input: 'text', placeholder: 'Type a unit (e.g. A/2-1 IN) — new units are created automatically', width: 'wide' },
+      { key: 'direction', label: 'Flow', type: TYPES.SELECT, options: DIRECTIONS, default: 'Drop-off' },
+      { key: 'status', label: 'Status', type: TYPES.SELECT, options: STATUSES, default: 'Scheduled' },
+      { key: 'items', label: 'Equipment', type: TYPES.ITEMS },
+      { key: 'poc', label: 'POC (optional)', type: TYPES.TEXT, table: false },
+      { key: 'notes', label: 'Notes', type: TYPES.TEXTAREA, table: false },
+    ],
+  },
+  {
+    name: 'units',
+    label: 'Units',
+    singular: 'Unit',
+    icon: 'people',
+    primary: 'name',
+    defaultSort: { key: 'name', dir: 'asc' },
+    fields: [
+      { key: 'name', label: 'Unit', type: TYPES.TEXT, required: true, width: 'wide' },
+      { key: 'poc', label: 'POC', type: TYPES.TEXT },
+      { key: 'phone', label: 'Phone', type: TYPES.TEL },
+      { key: 'notes', label: 'Notes', type: TYPES.TEXTAREA, table: false },
+    ],
+  },
+  {
+    name: 'weapons',
+    label: 'Weapons',
+    singular: 'Weapon',
+    icon: 'target',
+    primary: 'name',
+    defaultSort: { key: 'name', dir: 'asc' },
+    fields: [
+      { key: 'name', label: 'Weapon Type', type: TYPES.TEXT, required: true, width: 'wide' },
+      { key: 'count', label: 'On Hand', type: TYPES.NUMBER, step: 1, default: 0 },
+      { key: 'notes', label: 'Notes', type: TYPES.TEXTAREA, table: false },
+    ],
+  },
+  {
+    name: 'notes',
+    label: 'Shop Notes',
+    singular: 'Note',
+    icon: 'note',
+    primary: 'message',
+    defaultSort: { key: 'createdAt', dir: 'desc' },
+    fields: [
+      { key: 'message', label: 'Message', type: TYPES.TEXTAREA, required: true, width: 'wide' },
+    ],
+  },
+  {
+    name: 'eqtypes',
+    label: 'Equipment Types',
+    singular: 'Equipment Type',
+    icon: 'tag',
+    primary: 'name',
+    defaultSort: { key: 'name', dir: 'asc' },
+    fields: [
+      { key: 'name', label: 'Type', type: TYPES.TEXT, required: true, width: 'wide' },
+    ],
+  },
+];
+
+const collectionByName = Object.fromEntries(collections.map((c) => [c.name, c]));
+
+// Which fields get type-coerced on the server before persisting.
+function coerceValue(field, value) {
+  if (value === null || value === undefined || value === '') {
+    if (field.type === TYPES.NUMBER || field.type === TYPES.CURRENCY) return null;
+    if (field.type === TYPES.BOOL) return false;
+    if (field.type === TYPES.ITEMS) return [];
+    return value === undefined ? '' : value;
+  }
+  switch (field.type) {
+    case TYPES.NUMBER:
+    case TYPES.CURRENCY: {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+    case TYPES.BOOL:
+      return value === true || value === 'true' || value === 1 || value === '1';
+    case TYPES.ITEMS:
+      return normalizeItems(value);
+    default:
+      return String(value);
+  }
+}
+
+// Equipment lines on an appointment: [{ eqType, qty, description }].
+function normalizeItems(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((raw) => {
+      if (raw === null || raw === undefined) return null;
+      if (typeof raw === 'string') return { eqType: raw.trim(), qty: 1, description: '' };
+      const qty = Math.max(1, Math.min(9999, Math.round(Number(raw.qty) || 1)));
+      return {
+        eqType: String(raw.eqType ?? '').trim(),
+        qty,
+        description: String(raw.description ?? '').trim(),
+      };
+    })
+    .filter((it) => it && (it.eqType || it.description))
+    .slice(0, 50);
+}
+
+// Human summary of an item list, e.g. "2× Generator · 1× Radio ASIP".
+function itemSummary(items) {
+  return normalizeItems(items)
+    .map((it) => {
+      const desc = it.description ? ` — ${it.description}` : '';
+      return `${it.qty}× ${it.eqType || 'Equipment'}${desc}`;
+    })
+    .join(' · ');
+}
+
+function titleOf(collectionName, record) {
+  const meta = collectionByName[collectionName];
+  if (!meta) return record?.id || '';
+  if (meta.titleOf) return meta.titleOf(record);
+  return record[meta.primary] || record.name || record.message || record.id;
+}
+
+// Appointment helpers -------------------------------------------------------
+
+// The appointment's unit name, resolved through the units collection.
+function unitNameOf(record, units = []) {
+  if (record.unitName) return record.unitName;
+  const unit = units.find((u) => u.id === record.unitId);
+  return unit ? unit.name : '';
+}
+
+// Is a scheduled appointment past due? (date/time in the past, still "Scheduled")
+function isApptOverdue(record, now = new Date()) {
+  if (record.status !== 'Scheduled' || !record.date) return false;
+  const p2 = (n) => String(n).padStart(2, '0');
+  const nowKey = `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}`;
+  const key = `${record.date} ${record.time || '23:59'}`;
+  return key < nowKey;
+}
+
+// Compute the derived fields (used by the client and available to the server).
+function computeFields(collectionName, item) {
+  const out = {};
+  if (collectionName === 'appointments') {
+    out.totalQty = normalizeItems(item.items).reduce((n, it) => n + it.qty, 0);
+    out.itemCount = normalizeItems(item.items).length;
+    out.overdue = isApptOverdue(item);
+  }
+  return out;
+}
+
+const settingsSchema = [
+  { key: 'shopName', label: 'Shop name', type: TYPES.TEXT, default: 'Shop Ops' },
+  { key: 'shopSubtitle', label: 'Shop subtitle / location', type: TYPES.TEXT, default: 'Drop-off & Pickup · Arms Room · Shop Notes' },
+  { key: 'rotateSeconds', label: 'Wall board rotation (seconds)', type: TYPES.NUMBER, default: 14 },
+  { key: 'kioskViews', label: 'Wall board views', type: TYPES.TEXT, default: 'board,schedule,weapons,notes' },
+];
+
+const KIOSK_VIEWS = {
+  board: 'Drop-offs & Pickups',
+  schedule: 'Schedule (7 days)',
+  weapons: 'Weapons on Hand',
+  notes: 'Shop Notes',
+  overview: 'Shop Overview',
+};
+
+const defaultSettings = Object.fromEntries(
+  settingsSchema.map((s) => [s.key, s.default]),
+);
+  return { TYPES, DIRECTIONS, STATUSES, COLORS, collections, collectionByName, coerceValue, normalizeItems, itemSummary, titleOf, unitNameOf, isApptOverdue, computeFields, settingsSchema, KIOSK_VIEWS, defaultSettings };
+})();
+
+// ═══════════════ shared/legacy.js ═══════════════
+const __mod_shared_legacy_js = (() => {
+
+// Legacy import: migrate data from the old Streamlit shop tracker.
+// The old app used three CSV files with these shapes:
+//
+//   equipment.csv   TIME,Unit,Equipment,Direction,Notes
+//                   TIME is "MM/DD HH:MM"; Equipment may hold several lines.
+//   weapons.csv     Weapon,Count
+//   shop_notes.csv  Message
+//
+// Everything here is pure (no DOM, no fetch) so it can be unit-tested in Node
+// and reused by the browser importer.
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  const src = String(text ?? '').replace(/^\uFEFF/, '');
+  let i = 0;
+  const push = () => {
+    row.push(field);
+    field = '';
+  };
+  const endRow = () => {
+    // Drop truly blank lines (no cells, or the leftover of a trailing newline).
+    if (row.length && !(row.length === 1 && row[0] === '')) rows.push(row);
+    row = [];
+  };
+  while (i < src.length) {
+    const c = src[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (src[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i += 1; continue;
+      }
+      field += c; i += 1; continue;
+    }
+    if (c === '"') { inQuotes = true; i += 1; continue; }
+    if (c === ',') { push(); i += 1; continue; }
+    if (c === '\r') { i += 1; continue; }
+    if (c === '\n') { push(); endRow(); i += 1; continue; }
+    field += c; i += 1;
+  }
+  push();
+  endRow();
+  return rows;
+}
+
+function rowsToObjects(rows) {
+  if (!rows.length) return [];
+  const header = rows[0].map((h) => h.trim().toLowerCase());
+  return rows.slice(1).map((cells) => {
+    const obj = {};
+    header.forEach((key, i) => { obj[key] = (cells[i] ?? '').trim(); });
+    return obj;
+  });
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// "MM/DD HH:MM" (optionally "MM/DD/YYYY HH:MM", time optional) -> { date, time }
+// Legacy files usually carry no year: use the current year, but if that would
+// land more than ~9 months in the future assume the entry belongs to last year.
+function parseLegacyTime(raw, today = new Date()) {
+  const out = { date: '', time: '09:00' };
+  const text = String(raw ?? '').trim();
+  if (!text) return out;
+  const m = text.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*,?\s*(?:(\d{1,2}):(\d{2}))?/);
+  if (!m) return out;
+  const month = Number(m[1]);
+  const day = Number(m[2]);
+  let year = m[3] ? Number(m[3]) : null;
+  if (year !== null && year < 100) year += 2000;
+  if (m[4] !== undefined) out.time = `${pad(Number(m[4]) % 24)}:${pad(Number(m[5]))}`;
+  if (!(month >= 1 && month <= 12 && day >= 1 && day <= 31)) return out;
+
+  if (year === null) {
+    year = today.getFullYear();
+    const candidate = new Date(year, month - 1, day, 12);
+    const diffDays = (candidate.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12).getTime()) / 86400000;
+    if (diffDays > 270) year -= 1; // stale rows from last year
+  }
+  out.date = `${year}-${pad(month)}-${pad(day)}`;
+  return out;
+}
+
+const DIRECTION_MAP = {
+  incoming: 'Drop-off', inbound: 'Drop-off', dropoff: 'Drop-off', 'drop-off': 'Drop-off',
+  outgoing: 'Pickup', outbound: 'Pickup', pickup: 'Pickup', 'pick-up': 'Pickup',
+};
+
+function mapDirection(raw) {
+  return DIRECTION_MAP[String(raw ?? '').trim().toLowerCase()] || 'Drop-off';
+}
+
+// Split a legacy "Equipment" cell (one line per item) into item objects.
+// Quantities need an explicit marker ("Generator x3" / "Radio ×2") so serial
+// numbers like "MEP-803A #7" or "Trailer 3" stay untouched.
+function parseEquipmentLines(raw) {
+  return String(raw ?? '')
+    .split(/\r?\n|;+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const m = line.match(/^(.*?)(?:\s+[xX×]\s*|\s*×\s*)(\d{1,4})$/);
+      if (m && m[1].trim()) {
+        return { eqType: m[1].trim().replace(/[,;]$/, ''), qty: Math.min(9999, Number(m[2])), description: '' };
+      }
+      return { eqType: line.replace(/[,;]$/, ''), qty: 1, description: '' };
+    })
+    .slice(0, 50);
+}
+
+function isoOf(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * Detect the kind of CSV from its header and map it onto this app's records.
+ * Returns { kind, records, warnings } or null when the header is unrecognized.
+ */
+function mapLegacyCsv(text, today = new Date()) {
+  const rows = rowsToObjects(parseCsv(text));
+  if (!rows.length) return null;
+  const keys = Object.keys(rows[0]);
+  const has = (k) => keys.includes(k);
+  const warnings = [];
+
+  if (has('time') && has('unit') && has('equipment')) {
+    const records = [];
+    for (const row of rows) {
+      const { date, time } = parseLegacyTime(row['time'], today);
+      const unit = (row['unit'] || '').trim();
+      const equipment = row['equipment'] ?? '';
+      const notes = (row['notes'] || '').trim();
+      const direction = mapDirection(row['direction']);
+      if (!unit && !equipment) continue;
+      const items = parseEquipmentLines(equipment);
+      if (!items.length && unit) { /* keep unit-only appointment */ }
+      if (!date) warnings.push(`Unreadable time "${row['time']}" — defaulted date`);
+      const status = date && date < isoOf(today) ? 'Completed' : 'Scheduled';
+      records.push({ date: date || isoOf(today), time, unitId: unit, direction, status, items, poc: '', notes });
+    }
+    return { kind: 'appointments', records, warnings };
+  }
+
+  if (has('weapon')) {
+    const records = [];
+    for (const row of rows) {
+      const name = (row['weapon'] || '').trim();
+      if (!name) continue;
+      const count = Math.max(0, Math.round(Number(row['count']) || 0));
+      records.push({ name, count, notes: (row['notes'] || '').trim() });
+    }
+    return { kind: 'weapons', records, warnings };
+  }
+
+  if (has('message')) {
+    const records = [];
+    for (const row of rows) {
+      const message = (row['message'] || '').trim();
+      if (!message) continue;
+      records.push({ message });
+    }
+    return { kind: 'notes', records, warnings };
+  }
+
+  return null;
+}
+
+/** Map several CSV files at once: [{ name, text }] -> combined payload. */
+function importLegacyCsvFiles(files, today = new Date()) {
+  const payload = { appointments: [], weapons: [], notes: [], warnings: [], detected: [] };
+  for (const file of files || []) {
+    try {
+      const mapped = mapLegacyCsv(file.text, today);
+      if (!mapped) {
+        payload.warnings.push(`${file.name}: unrecognized columns — skipped`);
+        continue;
+      }
+      payload.detected.push(`${file.name} → ${mapped.kind} (${mapped.records.length} rows)`);
+      payload[mapped.kind].push(...mapped.records);
+      payload.warnings.push(...mapped.warnings.map((w) => `${file.name}: ${w}`));
+    } catch (err) {
+      payload.warnings.push(`${file.name}: ${err.message}`);
+    }
+  }
+  // De-duplicate weapon names (last one wins) and note texts.
+  payload.weapons = [...new Map(payload.weapons.map((r) => [r.name.toLowerCase(), r])).values()];
+  payload.notes = [...new Set(payload.notes.map((r) => r.message))].map((message) => ({ message }));
+  return payload;
+}
+  return { parseCsv, rowsToObjects, parseLegacyTime, mapDirection, parseEquipmentLines, mapLegacyCsv, importLegacyCsvFiles };
+})();
+
+// ═══════════════ shared/seed.js ═══════════════
+const __mod_shared_seed_js = (() => {
+  const { defaultSettings } = __mod_shared_schema_js;
+// Seed data.
+//
+// buildSeed() creates an EMPTY shop: no appointments, units, weapons or notes.
+// It only sets sensible defaults plus a starter list of equipment types (pure
+// suggestions in the appointment form — editable in Settings).
+//
+// buildSample() returns the demo dataset that used to seed the app; it is kept
+// for the test suite and for anyone who wants a populated demo.
+
+const sid = (p) => `${p}-${Math.random().toString(36).slice(2, 8)}`;
+
+// Common suggestions for the "equipment type" field. Free text always works.
+const STARTER_EQTYPES = [
+  'Generator', 'Radio', 'Optic', 'Weapon Case', 'Vehicle Kit', 'Computer',
+  'Tool Kit', 'Comms', 'Tent', 'Water Buffalo', 'Night Vision',
+];
+
+function buildSeed() {
+  return {
+    meta: { version: 1, seededAt: new Date().toISOString() },
+    settings: { ...defaultSettings },
+    units: [],
+    eqtypes: STARTER_EQTYPES.map((name) => ({ id: sid('eqt'), name })),
+    appointments: [],
+    weapons: [],
+    notes: [],
+    activity: [
+      { id: sid('act'), at: new Date().toISOString(), actor: 'system', text: 'Empty workspace created' },
+    ],
+  };
+}
+
+function iso(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// A populated demo shop (used by tests; you can wire it to a "load sample data"
+// button later if you ever want it back).
+function buildSample() {
+  const units = [
+    { id: 'unit-a', name: 'A/2-1 IN', poc: 'SGT Ruiz', phone: 'kx 2105', notes: 'Turn-ins usually Tue/Thu mornings.' },
+    { id: 'unit-b', name: 'B/2-1 IN', poc: 'SSG Calloway', phone: 'kx 2210', notes: '' },
+    { id: 'unit-hhc', name: 'HHC', poc: 'SFC Delgado', phone: 'kx 2001', notes: '' },
+    { id: 'unit-ccc', name: 'C/2-1 IN', poc: 'SPD Vance', phone: 'kx 2318', notes: 'Draws comms gear ahead of JRTC.' },
+  ];
+
+  const appointments = [
+    {
+      id: sid('apt'), date: iso(0), time: '07:30', unitId: 'unit-a', direction: 'Drop-off', status: 'Scheduled',
+      items: [
+        { eqType: 'Generator', qty: 1, description: 'MEP-831B — 400Hz fault' },
+        { eqType: 'Vehicle Kit', qty: 1, description: 'M1152 tool kit, lost jack' },
+      ],
+      poc: 'SGT Ruiz', notes: 'Gate pass filed under MTM-0117.',
+    },
+    {
+      id: sid('apt'), date: iso(0), time: '09:00', unitId: 'unit-b', direction: 'Pickup', status: 'Scheduled',
+      items: [
+        { eqType: 'Optic', qty: 4, description: 'TA31ECOS — zero confirmation done' },
+        { eqType: 'Weapon Case', qty: 2, description: '' },
+      ],
+      poc: 'SSG Calloway', notes: 'Bring DD Form 314s.',
+    },
+    {
+      id: sid('apt'), date: iso(0), time: 'TBD', unitId: 'unit-hhc', direction: 'Drop-off', status: 'Scheduled',
+      items: [{ eqType: 'Comms', qty: 1, description: 'JBCP Suite — annual PMCS' }],
+      poc: 'SFC Delgado', notes: 'Time to be confirmed.',
+    },
+    {
+      id: sid('apt'), date: iso(1), time: '08:00', unitId: 'unit-b', direction: 'Drop-off', status: 'Scheduled',
+      items: [{ eqType: 'Generator', qty: 3, description: 'TES subset — 100hr services' }],
+      poc: 'SSG Calloway', notes: '',
+    },
+    {
+      id: sid('apt'), date: iso(2), time: '10:30', unitId: 'unit-a', direction: 'Pickup', status: 'Scheduled',
+      items: [{ eqType: 'Generator', qty: 2, description: 'MEP-803A — fuel leak repaired' }],
+      poc: 'SGT Ruiz', notes: '',
+    },
+  ];
+
+  const weapons = [
+    { id: sid('wpn'), name: 'M4 Carbine', count: 42, notes: '12 allocated to ranges this month.' },
+    { id: sid('wpn'), name: 'M17', count: 24, notes: '' },
+    { id: sid('wpn'), name: 'M249 SAW', count: 7, notes: '2 in transit to DS for barrel swap.' },
+    { id: sid('wpn'), name: 'M240B', count: 9, notes: '' },
+  ];
+
+  const notes = [
+    { message: 'Range 12 closed Friday 0800–1600 — no scheduled draws that day.' },
+    { message: 'Turn-in NCO this week: SGT Ruiz (kx 2105).' },
+  ];
+
+  return {
+    ...buildSeed(),
+    units,
+    appointments,
+    weapons,
+    notes,
+  };
+}
+  return { buildSeed, buildSample };
+})();
+
+// ═══════════════ js/util.js ═══════════════
+const __mod_js_util_js = (() => {
+
+// Small DOM + formatting helpers. The whole client is plain ES modules with no
+// framework, so this is the "runtime" everything else builds on.
+
+function h(tag, attrs, ...children) {
+  const node = document.createElement(tag);
+  if (attrs) {
+    for (const [key, value] of Object.entries(attrs)) {
+      if (value === null || value === undefined || value === false) continue;
+      if (key === 'class') node.className = value;
+      else if (key === 'dataset') Object.assign(node.dataset, value);
+      else if (key === 'style' && typeof value === 'object') Object.assign(node.style, value);
+      else if (key === 'html') node.innerHTML = value;
+      else if (key === 'value') node.value = value;
+      else if (key === 'checked') node.checked = Boolean(value);
+      else if (key.startsWith('on') && typeof value === 'function') {
+        node.addEventListener(key.slice(2).toLowerCase(), value);
+      } else if (value === true) node.setAttribute(key, '');
+      else node.setAttribute(key, value);
+    }
+  }
+  append(node, children);
+  return node;
+}
+
+function append(node, children) {
+  for (const child of children.flat(Infinity)) {
+    if (child === null || child === undefined || child === false || child === true) continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
+function clear(node) {
+  node.replaceChildren();
+  return node;
+}
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+function debounce(fn, ms = 200) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+// ---- formatting ----------------------------------------------------------
+function fmtDate(value) {
+  if (!value) return '';
+  const d = new Date(value + (value.length === 10 ? 'T00:00:00' : ''));
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function fmtDateShort(value) {
+  if (!value) return '';
+  const d = new Date(value + (value.length === 10 ? 'T00:00:00' : ''));
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function relTime(iso) {
+  if (!iso) return '';
+  const then = new Date(iso).getTime();
+  const diff = Date.now() - then;
+  const abs = Math.abs(diff);
+  const mins = Math.round(abs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
+}
+
+function dueLabel(days) {
+  if (days === null || days === undefined) return { text: '', tone: '' };
+  if (days < 0) return { text: `${Math.abs(days)}d overdue`, tone: 'bad' };
+  if (days === 0) return { text: 'Due today', tone: 'warn' };
+  if (days === 1) return { text: 'Due tomorrow', tone: 'warn' };
+  if (days <= 7) return { text: `In ${days}d`, tone: 'info' };
+  return { text: `In ${days}d`, tone: '' };
+}
+
+function money(n) {
+  if (n === null || n === undefined || n === '') return '';
+  const value = Number(n);
+  if (!Number.isFinite(value)) return String(n);
+  return value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr + 'T00:00:00');
+  if (Number.isNaN(target.getTime())) return null;
+  return Math.round((target - today) / 86400000);
+}
+
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Next half-hour mark, used as the default time for new appointments.
+function nextHalfHour() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + 30, 0, 0);
+  const mins = d.getMinutes() - (d.getMinutes() % 30);
+  d.setMinutes(mins);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// "Mon, Oct 12" style header for board dates.
+function fmtDayLong(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return String(dateStr);
+  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// "Mon 12" style label for week-strip day cards.
+function fmtDayStrip(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return String(dateStr);
+  return d.toLocaleDateString(undefined, { weekday: 'short' }) + ' ' + d.getDate();
+}
+
+// Monday-based start of the week containing `dateStr` (defaults to today).
+function weekStart(dateStr = todayIso()) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return todayIso();
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function shiftDays(dateStr, days) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return dateStr;
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Where the wall-board (kiosk) page lives. Opened as a plain file it is the
+// sibling display.html; when the server serves the app it is the /display route.
+function kioskUrl() {
+  try {
+    if (location.protocol === 'file:') return new URL('display.html', location.href).href;
+    return location.origin + '/display';
+  } catch {
+    return 'display.html';
+  }
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function sortItems(items, sort, getters = {}) {
+  if (!sort || !sort.key) return items;
+  const dir = sort.dir === 'desc' ? -1 : 1;
+  const get = getters[sort.key];
+  return [...items].sort((a, b) => {
+    let av = get ? get(a) : a[sort.key];
+    let bv = get ? get(b) : b[sort.key];
+    if (av === null || av === undefined || av === '') av = dir === 1 ? '\uffff' : '';
+    if (bv === null || bv === undefined || bv === '') bv = dir === 1 ? '\uffff' : '';
+    if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+    return String(av).localeCompare(String(bv), undefined, { numeric: true }) * dir;
+  });
+}
+
+function download(filename, text, mime = 'application/json') {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = h('a', { href: url, download: filename });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+  return { h, append, clear, $, $$, debounce, uid, fmtDate, fmtDateShort, relTime, dueLabel, money, daysUntil, todayIso, nextHalfHour, fmtDayLong, fmtDayStrip, weekStart, shiftDays, kioskUrl, clamp, sortItems, download, escapeHtml };
+})();
+
+// ═══════════════ js/icons.js ═══════════════
+const __mod_js_icons_js = (() => {
+
+// Minimal stroke icon set (Feather-style 24x24 paths).
+const PATHS = {
+  dashboard: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+  clipboard: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 11h8M8 15h5"/>',
+  machine: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  box: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/>',
+  people: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  truck: '<rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  settings: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  trash: '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  filter: '<path d="M22 3H2l8 9.46V19l4 2v-8.54z"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  play: '<path d="M5 3l14 9-14 9z"/>',
+  pause: '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  refresh: '<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  chevron: '<path d="m9 18 6-6-6-6"/>',
+  wifi: '<path d="M5 12.6a11 11 0 0 1 14 0M1.4 9a16 16 0 0 1 21.2 0M8.5 16.1a6 6 0 0 1 7 0M12 20h.01"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+  home: '<path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21"/>',
+  note: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>',
+  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0l-7-7V4a1 1 0 0 1 1-1h9.6l6.4 6.4a2 2 0 0 1 0 3z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+  arrowdown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+  arrowup: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+  undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+  move: '<path d="M5 9h10l-3-3M5 9l3 3M19 15H9l3 3M19 15l-3-3"/>',
+  pin: '<path d="M12 17v5M9 3h6l-1 6 3 3H7l3-3z"/>',
+};
+
+function icon(name, size = 18) {
+  const path = PATHS[name] || PATHS.box;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.9');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.classList.add('icon');
+  svg.innerHTML = path;
+  return svg;
+}
+
+// Brand mark: a hex nut / gear plate, rendered in the industrial amber palette.
+// Used for the app sidebar, the wall board header and the welcome screen.
+function brandMark(size = 40) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 48 48');
+  svg.setAttribute('width', size);
+  svg.setAttribute('height', size);
+  svg.classList.add('brand-svg');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'Grizzly System Engineering');
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="gseMarkGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#fbbf24"/>
+        <stop offset="1" stop-color="#d97706"/>
+      </linearGradient>
+    </defs>
+    <path d="M24 3.6 41.4 13.8v20.4L24 44.4 6.6 34.2V13.8z" fill="url(#gseMarkGrad)"/>
+    <path d="M24 8.4 37.2 16v16L24 39.6 10.8 32V16z" fill="#0b1220" opacity=".9"/>
+    <circle cx="24" cy="24" r="8.2" fill="url(#gseMarkGrad)"/>
+    <circle cx="24" cy="24" r="3.1" fill="#0b1220"/>
+    <g stroke="url(#gseMarkGrad)" stroke-width="2.4" stroke-linecap="round">
+      <path d="M24 13.2v2.6M24 32.2v2.6M13.2 24h2.6M32.2 24h2.6"/>
+    </g>`;
+  return svg;
+}
+  return { icon, brandMark };
+})();
+
+// ═══════════════ js/api.js ═══════════════
+const __mod_js_api_js = (() => {
+
+// Thin REST client. Every write carries an X-Actor header so the activity feed
+// can say who changed what.
+const ACTOR_KEY = 'shopline.actor';
+
+function getActor() {
+  return localStorage.getItem(ACTOR_KEY) || '';
+}
+
+function setActor(name) {
+  if (name) localStorage.setItem(ACTOR_KEY, name);
+  else localStorage.removeItem(ACTOR_KEY);
+}
+
+async function request(method, path, body) {
+  const headers = { 'X-Actor': encodeURIComponent(getActor() || 'Operator') };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const res = await fetch(path, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new Error(data?.error || `${res.status} ${res.statusText}`);
+  return data;
+}
+
+const api = {
+  state: () => request('GET', '/api/state'),
+  create: (collection, item) => request('POST', `/api/${collection}`, item),
+  update: (collection, id, patch) => request('PATCH', `/api/${collection}/${id}`, patch),
+  remove: (collection, id) => request('DELETE', `/api/${collection}/${id}`),
+  settings: (patch) => request('PATCH', '/api/settings', patch),
+  importAll: (data) => request('POST', '/api/import', data),
+  clear: () => request('POST', '/api/clear'),
+};
+  return { getActor, setActor, api };
+})();
+
+// ═══════════════ js/localdb.js ═══════════════
+const __mod_js_localdb_js = (() => {
+  const { collections, collectionByName, coerceValue, titleOf, normalizeItems } = __mod_shared_schema_js;
+  const { buildSeed } = __mod_shared_seed_js;
+// Browser-local database. When the app is opened as a plain file (double-click
+// index.html) there is no server and no shared JSON file — so records are kept
+// in this browser's localStorage instead. Semantics mirror lib/db.js exactly:
+// schema coercion, unit lookup by name, timestamps and an activity log, so the
+// rest of the app cannot tell the two modes apart.
+//
+// Editing anywhere saves instantly; other open tabs pick the change up through
+// the browser 'storage' event.
+
+const STORAGE_KEY = 'shopops.db.v2';
+
+// A tiny Storage-compatible shim for environments without localStorage
+// (tests, private-mode edge cases) so the app still works in-memory.
+function memoryStorage() {
+  const map = new Map();
+  return {
+    getItem: (k) => (map.has(k) ? map.get(k) : null),
+    setItem: (k, v) => { map.set(k, String(v)); },
+    removeItem: (k) => { map.delete(k); },
+    _map: map,
+  };
+}
+
+function browserStorage() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('shopops.probe', '1');
+      localStorage.removeItem('shopops.probe');
+      return localStorage;
+    }
+  } catch { /* blocked */ }
+  return memoryStorage();
+}
+
+const newId = (prefix) => `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+const ID_PREFIX = {
+  appointments: 'apt',
+  units: 'unit',
+  weapons: 'wpn',
+  notes: 'note',
+  eqtypes: 'eqt',
+};
+
+function makeLocalDb(storage = browserStorage(), key = STORAGE_KEY) {
+  let db = null;
+  const listeners = new Set();
+
+  function persist() {
+    try {
+      db.meta = { ...db.meta, version: 1, updatedAt: new Date().toISOString() };
+      storage.setItem(key, JSON.stringify(db));
+    } catch (err) {
+      console.error('[localdb] could not save', err);
+    }
+  }
+
+  function emit(event) {
+    for (const fn of listeners) {
+      try { fn(event); } catch (err) { console.error('[localdb] listener error', err); }
+    }
+  }
+
+  function load() {
+    try {
+      const raw = storage.getItem(key);
+      if (raw) db = JSON.parse(raw);
+    } catch { db = null; }
+    if (!db || typeof db !== 'object') {
+      db = buildSeed();
+      persist();
+    }
+    for (const c of collections) if (!Array.isArray(db[c.name])) db[c.name] = [];
+    if (!Array.isArray(db.activity)) db.activity = [];
+    if (!db.settings || typeof db.settings !== 'object') db.settings = {};
+    if (!db.meta) db.meta = { version: 1 };
+    syncAllUnitNames();
+    return db;
+  }
+
+  function syncUnitName(record) {
+    if (!record) return record;
+    if (!record.unitId) { record.unitName = record.unitName || ''; return record; }
+    const unit = (db.units || []).find((u) => u.id === record.unitId);
+    if (unit && unit.name !== record.unitName) record.unitName = unit.name;
+    return record;
+  }
+  function syncAllUnitNames() {
+    for (const appt of db.appointments || []) syncUnitName(appt);
+  }
+
+  function resolveRefByName(refName, raw) {
+    const list = db[refName] || [];
+    const existing = list.find((r) => r.id === raw)
+      || list.find((r) => String(r.name).toLowerCase() === raw.toLowerCase());
+    if (existing) return existing.id;
+    const refMeta = collectionByName[refName];
+    const created = {
+      id: newId(ID_PREFIX[refName] || 'ref'),
+      [refMeta?.primary === 'message' ? 'message' : 'name']: raw,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    list.unshift(created);
+    logActivity('system', `Added ${refMeta?.singular.toLowerCase() || refName} "${raw}" (referenced by another record)`);
+    return created.id;
+  }
+
+  function coerceRecord(collectionName, input, base = {}) {
+    const col = collectionByName[collectionName];
+    const out = { ...base };
+    for (const field of col.fields) {
+      if (!Object.prototype.hasOwnProperty.call(input, field.key)) continue;
+      let value = input[field.key];
+      if (field.resolveByName && typeof value === 'string' && value.trim()) {
+        value = resolveRefByName(field.ref, value.trim());
+      }
+      out[field.key] = coerceValue(field, value);
+    }
+    return out;
+  }
+
+  function logActivity(actor, text) {
+    const entry = { id: newId('act'), at: new Date().toISOString(), actor: actor || 'browser', text };
+    db.activity.unshift(entry);
+    db.activity = db.activity.slice(0, 300);
+    return entry;
+  }
+
+  function create(collectionName, input, actor) {
+    const col = collectionByName[collectionName];
+    const record = coerceRecord(collectionName, input, {});
+    for (const field of col.fields) {
+      if (record[field.key] === undefined && field.default !== undefined) record[field.key] = field.default;
+    }
+    record.id = newId(ID_PREFIX[collectionName] || 'rec');
+    record.createdAt = new Date().toISOString();
+    record.updatedAt = record.createdAt;
+    if (collectionName === 'appointments') syncUnitName(record);
+    db[collectionName].unshift(record);
+    const note = logActivity(actor, `Added ${col.singular.toLowerCase()} "${titleOf(collectionName, record)}"`);
+    persist();
+    emit({ type: 'create', collection: collectionName, item: record, activity: note, actor });
+    return record;
+  }
+
+  function update(collectionName, id, patch, actor) {
+    const col = collectionByName[collectionName];
+    const record = db[collectionName].find((r) => r.id === id);
+    if (!record) return null;
+    const merged = coerceRecord(collectionName, patch, record);
+    merged.updatedAt = new Date().toISOString();
+    Object.assign(record, merged);
+    if (collectionName === 'appointments') syncUnitName(record);
+    if (collectionName === 'units') {
+      for (const appt of db.appointments || []) {
+        if (appt.unitId === id && appt.unitName !== record.name) appt.unitName = record.name;
+      }
+    }
+    const note = logActivity(actor, `Updated ${col.singular.toLowerCase()} "${titleOf(collectionName, record)}"`);
+    persist();
+    emit({ type: 'update', collection: collectionName, item: record, activity: note, actor });
+    return record;
+  }
+
+  function remove(collectionName, id, actor) {
+    const col = collectionByName[collectionName];
+    const idx = db[collectionName].findIndex((r) => r.id === id);
+    if (idx === -1) return null;
+    const [record] = db[collectionName].splice(idx, 1);
+    const note = logActivity(actor, `Deleted ${col.singular.toLowerCase()} "${titleOf(collectionName, record)}"`);
+    persist();
+    emit({ type: 'delete', collection: collectionName, item: record, activity: note, actor });
+    return record;
+  }
+
+  function updateSettings(patch, actor) {
+    db.settings = { ...db.settings, ...patch };
+    const note = logActivity(actor, 'Updated shop settings');
+    persist();
+    emit({ type: 'settings', settings: db.settings, activity: note, actor });
+    return db.settings;
+  }
+
+  function replaceAll(incoming, actor) {
+    const next = { ...incoming };
+    for (const c of collections) {
+      if (!Array.isArray(next[c.name])) next[c.name] = [];
+    }
+    if (!Array.isArray(next.activity)) next.activity = [];
+    if (!next.settings || typeof next.settings !== 'object') next.settings = { ...db.settings };
+    next.meta = { ...(next.meta || {}), version: 1, restoredAt: new Date().toISOString() };
+    db = next;
+    syncAllUnitNames();
+    logActivity(actor, 'Restored database from backup');
+    persist();
+    emit({ type: 'reload', actor });
+    return db;
+  }
+
+  function wipe(actor) {
+    const keepSettings = { ...db.settings };
+    const keepTypes = [...(db.eqtypes || [])];
+    db = buildSeed();
+    db.settings = keepSettings;
+    if (keepTypes.length) db.eqtypes = keepTypes;
+    logActivity(actor, 'Cleared all data');
+    persist();
+    emit({ type: 'reload' });
+    return db;
+  }
+
+  function snapshot() {
+    return {
+      collections: Object.fromEntries(collections.map((c) => [c.name, db[c.name]])),
+      settings: db.settings,
+      activity: db.activity.slice(0, 50),
+      meta: db.meta,
+      serverTime: new Date().toISOString(),
+      clients: 1,
+      mode: 'browser',
+    };
+  }
+
+  load();
+
+  return {
+    mode: 'browser',
+    load,
+    snapshot,
+    create,
+    update,
+    remove,
+    updateSettings,
+    replaceAll,
+    wipe,
+    onChange: (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    state: () => snapshot(),
+    // REST-like aliases so the store can treat both backends identically.
+    items: (collectionName) => db[collectionName],
+    // Raw access for tests.
+    _db: () => db,
+  };
+}
+
+// The singleton used by the app.
+const localDb = makeLocalDb();
+
+// React to edits made in OTHER tabs of the same browser.
+function watchStorage(onChange) {
+  if (typeof window === 'undefined') return () => {};
+  const handler = (e) => {
+    if (e.key === STORAGE_KEY || e.key === null) onChange(e);
+  };
+  window.addEventListener('storage', handler);
+  return () => window.removeEventListener('storage', handler);
+}
+  return { STORAGE_KEY, memoryStorage, browserStorage, makeLocalDb, localDb, watchStorage };
+})();
+
+// ═══════════════ js/store.js ═══════════════
+const __mod_js_store_js = (() => {
+  const { api, getActor } = __mod_js_api_js;
+  const { collections, collectionByName } = __mod_shared_schema_js;
+  const { localDb, watchStorage } = __mod_js_localdb_js;
+// Central reactive store. Two backends, identical surface:
+//   server  - REST + Server-Sent Events when the app is served by node server.js
+//             (data lives in data/db.json and is shared across the LAN, live)
+//   browser - localStorage when the app is opened as a plain file (double-click
+//             index.html); edits save instantly in this browser, and other open
+//             tabs sync through the browser 'storage' event.
+// Views subscribe and re-render on change.
+
+// file:// pages have no server; everything else talks to the REST backend.
+let mode = (typeof location !== 'undefined' && location.protocol === 'file:') ? 'browser' : 'server';
+let backend = mode === 'browser' ? localDb : api;
+
+const listeners = new Set();
+
+const state = {
+  collections: {},
+  settings: {},
+  activity: [],
+  meta: {},
+  connected: false,
+  lastSync: null,
+  clients: 0,
+};
+
+for (const c of collections) state.collections[c.name] = [];
+
+let ready = false;
+let es = null;
+
+function subscribe(fn) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+function notify(event) {
+  for (const fn of listeners) {
+    try {
+      fn(event, state);
+    } catch (err) {
+      console.error('[store] listener failed', err);
+    }
+  }
+}
+
+function isReady() {
+  return ready;
+}
+
+async function load() {
+  let snap;
+  try {
+    snap = await backend.state();
+  } catch (err) {
+    // Opened over http(s) but no API answered (e.g. a plain static host)?
+    // Fall back to browser storage so the page still works everywhere.
+    if (mode === 'server' && !ready && backend === api) {
+      console.warn('[store] server API unreachable — falling back to browser storage');
+      mode = 'browser';
+      backend = localDb;
+      snap = backend.state();
+    } else {
+      throw err;
+    }
+  }
+  state.collections = snap.collections;
+  state.settings = snap.settings || {};
+  state.activity = snap.activity || [];
+  state.meta = snap.meta || {};
+  state.clients = snap.clients || (mode === 'browser' ? 1 : 0);
+  state.lastSync = new Date();
+  ready = true;
+  notify({ type: 'loaded' });
+}
+
+function upsert(collectionName, item) {
+  const list = state.collections[collectionName];
+  if (!list) return;
+  const idx = list.findIndex((r) => r.id === item.id);
+  if (idx === -1) list.unshift(item);
+  else list[idx] = { ...list[idx], ...item };
+}
+
+function drop(collectionName, id) {
+  const list = state.collections[collectionName];
+  if (!list) return;
+  const idx = list.findIndex((r) => r.id === id);
+  if (idx !== -1) list.splice(idx, 1);
+}
+
+function addActivity(entry) {
+  if (!entry) return;
+  if (state.activity.some((a) => a.id === entry.id)) return;
+  state.activity.unshift(entry);
+  state.activity = state.activity.slice(0, 300);
+}
+
+function applyEvent(event) {
+  switch (event.type) {
+    case 'create':
+    case 'update':
+      upsert(event.collection, event.item);
+      break;
+    case 'delete':
+      drop(event.collection, event.item.id);
+      break;
+    case 'settings':
+      state.settings = event.settings;
+      break;
+    case 'reload':
+      load().catch((err) => console.error(err));
+      return;
+    case 'hello':
+      // Reconnected - pull a fresh snapshot to be safe.
+      load().catch((err) => console.error(err));
+      return;
+  }
+  if (event.activity) addActivity(event.activity);
+  state.lastSync = new Date();
+  notify(event);
+}
+
+function connect() {
+  if (mode === 'browser') {
+    // "Live sync" across tabs comes from the browser storage event.
+    state.connected = true;
+    watchStorage(() => load().catch((err) => console.error(err)));
+    return null;
+  }
+  if (es) es.close();
+  es = new EventSource('/api/events');  es.onopen = () => {
+    state.connected = true;
+    notify({ type: 'connection', connected: true });
+  };
+  es.onerror = () => {
+    state.connected = false;
+    notify({ type: 'connection', connected: false });
+  };
+  es.onmessage = (ev) => {
+    try {
+      applyEvent(JSON.parse(ev.data));
+    } catch (err) {
+      console.error('[store] bad event', err);
+    }
+  };
+  return es;
+}
+
+// ---- selectors -----------------------------------------------------------
+function col(name) {
+  return state.collections[name] || [];
+}
+
+function byId(name, id) {
+  if (!id) return null;
+  return col(name).find((r) => r.id === id) || null;
+}
+
+function label(name, id) {
+  const rec = byId(name, id);
+  if (!rec) return '';
+  const meta = collectionByName[name];
+  return rec[meta?.primary] || rec.name || rec.message || rec.id;
+}
+
+function options(name) {
+  const meta = collectionByName[name];
+  if (!meta) return [];
+  const fieldName = meta.primary;
+  return col(name)
+    .map((r) => ({ value: r.id, label: r[fieldName] || r.id }))
+    .sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { numeric: true }));
+}
+
+// ---- actions (the backend is the source of truth; SSE/storage echoes back) --
+async function save(collectionName, id, patch) {
+  const actor = getActor() || (mode === 'browser' ? 'this browser' : 'Operator');
+  if (id) {
+    const updated = await backend.update(collectionName, id, patch, actor);
+    upsert(collectionName, updated);
+    notify({ type: 'update', collection: collectionName, item: updated, local: true });
+    return updated;
+  }
+  const created = await backend.create(collectionName, patch, actor);
+  upsert(collectionName, created);
+  notify({ type: 'create', collection: collectionName, item: created, local: true });
+  return created;
+}
+
+async function remove(collectionName, id) {
+  const actor = getActor() || 'Operator';
+  await backend.remove(collectionName, id, actor);
+  drop(collectionName, id);
+  notify({ type: 'delete', collection: collectionName, item: { id }, local: true });
+}
+
+async function saveSettings(patch) {
+  const settings = await backend.updateSettings(patch, getActor() || 'Operator');
+  state.settings = settings;
+  notify({ type: 'settings', local: true });
+  return settings;
+}
+
+// ---- backups (work in both modes) -----------------------------------------
+function backupJson() {
+  return JSON.stringify({
+    collections: Object.fromEntries(collections.map((c) => [c.name, col(c.name)])),
+    settings: state.settings,
+    meta: state.meta,
+  }, null, 2);
+}
+
+async function restoreBackup(data) {
+  if (mode === 'browser') {
+    localDb.replaceAll(data, getActor() || 'this browser');
+  } else {
+    await api.importAll(data);
+  }
+  await load();
+}
+
+// Kick a full refresh (used after bulk imports).
+async function refresh() {
+  await load();
+}
+
+// Remove every record and start fresh (keeps settings + equipment types).
+async function clearAll() {
+  if (mode === 'browser') {
+    localDb.wipe(getActor() || 'this browser');
+  } else {
+    await api.clear();
+  }
+  await load();
+}
+  return { get mode() { return mode; }, set mode(v) { mode = v; }, state, subscribe, isReady, load, applyEvent, connect, col, byId, label, options, save, remove, saveSettings, backupJson, restoreBackup, refresh, clearAll };
+})();
+
+// ═══════════════ js/components.js ═══════════════
+const __mod_js_components_js = (() => {
+  const { h, append, clear, fmtDate, fmtDateShort, daysUntil, dueLabel, money, relTime, todayIso, nextHalfHour } = __mod_js_util_js;
+  const { icon } = __mod_js_icons_js;
+  const { COLORS, collectionByName, TYPES, itemSummary, titleOf, normalizeItems } = __mod_shared_schema_js;
+  const store = __mod_js_store_js;
+// Reusable UI building blocks: chips, toasts, modal forms, inline-editable
+// data tables and the drag-and-drop appointment board.
+
+// ---- chips / badges ------------------------------------------------------
+function chip(text, color) {
+  if (!text) return h('span', { class: 'muted' }, '—');
+  return h('span', { class: 'chip', style: color ? { '--chip': color } : null }, text);
+}
+
+function statusChip(value) {
+  return chip(value, COLORS[value]);
+}
+
+function dueBadge(days) {
+  const { text, tone } = dueLabel(days);
+  if (!text) return h('span', { class: 'muted' }, '—');
+  return h('span', { class: `badge ${tone}` }, text);
+}
+
+// ---- toasts --------------------------------------------------------------
+let toastHost = null;
+function toast(message, tone = 'ok') {
+  if (!toastHost) {
+    toastHost = h('div', { class: 'toast-host' });
+    document.body.append(toastHost);
+  }
+  const node = h('div', { class: `toast ${tone}` }, icon(tone === 'error' ? 'alert' : 'check', 16), h('span', {}, message));
+  toastHost.append(node);
+  setTimeout(() => {
+    node.classList.add('out');
+    setTimeout(() => node.remove(), 300);
+  }, 2600);
+}
+
+// ---- confirm dialog ------------------------------------------------------
+function confirmDialog({ title = 'Are you sure?', message = '', confirmLabel = 'Delete' } = {}) {
+  return new Promise((resolve) => {
+    const overlay = h('div', { class: 'overlay' });
+    const close = (val) => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      resolve(val);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') close(false);
+    };
+    document.addEventListener('keydown', onKey);
+    const dialog = h('div', { class: 'dialog small', role: 'dialog', 'aria-modal': 'true' },
+      h('div', { class: 'dialog-head' }, h('h3', {}, title)),
+      message ? h('div', { class: 'dialog-body' }, h('p', {}, message)) : null,
+      h('div', { class: 'dialog-foot' },
+        h('button', { class: 'btn ghost', onclick: () => close(false) }, 'Cancel'),
+        h('button', { class: 'btn danger', onclick: () => close(true) }, confirmLabel),
+      ),
+    );
+    overlay.append(dialog);
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(false); });
+    document.body.append(overlay);
+    dialog.querySelector('.btn.danger').focus();
+  });
+}
+
+// ---- modal form ----------------------------------------------------------
+function openForm({ collection, record = null, onSaved }) {
+  const meta = collectionByName[collection];
+  const isEdit = Boolean(record?.id);
+  const draft = {};
+  for (const field of meta.fields) {
+    if (field.type === 'computed') continue;
+    draft[field.key] = record ? record[field.key] : field.default ?? '';
+    // Typed reference fields (e.g. Unit) show the name, not the stored id.
+    if (field.input === 'text' && field.ref && draft[field.key]) {
+      const label = store.label(field.ref, draft[field.key]);
+      if (label) draft[field.key] = label;
+    }
+    // Sensible starting points for new records.
+    if (!isEdit && field.type === TYPES.DATE && !draft[field.key]) draft[field.key] = todayIso();
+    if (!isEdit && field.type === TYPES.TIME && !draft[field.key]) draft[field.key] = nextHalfHour();
+    if (!isEdit && field.type === TYPES.ITEMS) draft[field.key] = [];
+  }
+  const inputs = new Map();
+  const overlay = h('div', { class: 'overlay' });
+
+  const close = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', onKey);
+  };
+  const onKey = (e) => {
+    if (e.key === 'Escape') close();
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit();
+  };
+  document.addEventListener('keydown', onKey);
+
+  async function submit() {
+    // Required-field check first so nothing is written half-formed.
+    for (const field of meta.fields) {
+      if (!field.required) continue;
+      const input = inputs.get(field.key);
+      const value = readInput(input);
+      const empty = value === '' || value == null || (Array.isArray(value) && !value.length)
+        || (field.type === TYPES.ITEMS && !normalizeItems(value).length);
+      if (empty) {
+        toast(`${field.label} is required`, 'error');
+        const focusEl = input?.querySelector?.('input, select, textarea') || input;
+        focusEl?.focus?.();
+        return;
+      }
+    }
+    const patch = {};
+    for (const [key, input] of inputs) patch[key] = readInput(input);
+    try {
+      await store.save(collection, isEdit ? record.id : null, patch);
+      toast(`${isEdit ? 'Saved' : 'Added'} ${meta.singular.toLowerCase()}`);
+      close();
+      onSaved?.();
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  }
+
+  const form = h('form', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', onsubmit: (e) => { e.preventDefault(); submit(); } });
+  form.append(
+    h('div', { class: 'dialog-head' },
+      h('h3', {}, isEdit ? `Edit ${meta.singular}` : `New ${meta.singular}`),
+      iconButton('x', close, 'Close'),
+    ),
+  );
+  const grid = h('div', { class: 'form-grid' });
+  for (const field of meta.fields) {
+    if (field.type === 'computed') continue;
+    const input = fieldControl(field, draft[field.key]);
+    inputs.set(field.key, input);
+    grid.append(h('label', { class: `field ${field.type === TYPES.TEXTAREA || field.type === TYPES.ITEMS ? 'full' : ''}` },
+      h('span', { class: 'field-label' }, field.label, field.required ? h('em', {}, '*') : null),
+      input,
+    ));
+  }
+  form.append(h('div', { class: 'dialog-body' }, grid));
+  form.append(
+    h('div', { class: 'dialog-foot' },
+      isEdit ? h('button', {
+        type: 'button', class: 'btn danger ghost-soft',
+        onclick: async () => {
+          if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: 'This cannot be undone.' })) {
+            await store.remove(collection, record.id);
+            toast('Deleted');
+            close();
+            onSaved?.();
+          }
+        },
+      }, icon('trash', 16), 'Delete') : h('span', {}),
+      h('span', { class: 'spacer' }),
+      h('button', { type: 'button', class: 'btn ghost', onclick: close }, 'Cancel'),
+      h('button', { type: 'submit', class: 'btn primary' }, icon('save', 16), isEdit ? 'Save Changes' : `Add ${meta.singular}`),
+    ),
+  );
+
+  overlay.append(form);
+  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+  document.body.append(overlay);
+  const first = grid.querySelector('input, select, textarea');
+  first?.focus();
+}
+
+function readInput(input) {
+  if (!input) return '';
+  if (input.read) return input.read(); // composite editors (equipment items)
+  if (input.dataset.kind === 'bool') return input.checked;
+  return input.value;
+}
+
+// Editor for an appointment's equipment list: one row per item with a
+// type-ahead type field, a quantity and an optional description.
+function itemsControl(initialItems) {
+  const list = normalizeItems(initialItems);
+  if (!list.length) list.push({ eqType: '', qty: 1, description: '' });
+
+  const wrap = h('div', { class: 'items-editor' });
+  const rowsBox = h('div', { class: 'items-rows' });
+  const rows = [];
+
+  refreshEqtypeDatalist();
+
+  function addRow(item = { eqType: '', qty: 1, description: '' }) {
+    const row = h('div', { class: 'item-row' });
+    const type = h('input', { class: 'input item-type', list: 'eqtypes-datalist', placeholder: 'Equipment type', value: item.eqType ?? '' });
+    const qty = h('input', { class: 'input item-qty', type: 'number', min: '1', max: '9999', value: String(item.qty ?? 1) });
+    const desc = h('input', { class: 'input item-desc', placeholder: 'Description / serial (optional)', value: item.description ?? '' });
+    const entry = { row, type, qty, desc };
+    const rm = iconButton('x', () => {
+      const idx = rows.indexOf(entry);
+      if (idx > -1) rows.splice(idx, 1);
+      row.remove();
+      if (!rows.length) addRow();
+    }, 'Remove line', 'tiny');
+    row.append(type, qty, desc, rm);
+    rowsBox.append(row);
+    rows.push(entry);
+    return entry;
+  }
+
+  for (const item of list) addRow(item);
+
+  wrap.append(
+    rowsBox,
+    h('div', { class: 'items-foot' },
+      h('button', { type: 'button', class: 'btn ghost mini', onclick: () => addRow() }, icon('plus', 14), 'Add equipment line'),
+      h('span', { class: 'muted small' }, 'Type is free text — the datalist suggests types from Equipment Types (Settings).'),
+    ),
+  );
+
+  wrap.read = () => rows.map(({ type, qty, desc }) => ({
+    eqType: type.value.trim(),
+    qty: Math.max(1, Math.round(Number(qty.value) || 1)),
+    description: desc.value.trim(),
+  })).filter((it) => it.eqType || it.description);
+  wrap.querySelector('input')?.addEventListener('focus', refreshEqtypeDatalist);
+  return wrap;
+}
+
+// A single shared <datalist> with every known equipment type.
+function refreshEqtypeDatalist() {
+  refreshDatalist('eqtypes-datalist', store.options('eqtypes').map((o) => o.label));
+}
+
+// Create/refresh a shared <datalist> used for type-ahead text inputs.
+function refreshDatalist(id, values) {
+  let dl = document.getElementById(id);
+  if (!dl) {
+    dl = h('datalist', { id });
+    document.body.append(dl);
+  }
+  clear(dl);
+  for (const value of values) dl.append(h('option', { value: String(value) }));
+}
+
+// Time field with a "TBD" option: the stored value becomes the literal "TBD".
+function timeControl(value) {
+  const isTbd = String(value ?? '').trim().toUpperCase() === 'TBD';
+  const input = h('input', { class: 'input', type: 'time', value: isTbd ? '' : (value || '') });
+  const box = h('input', { type: 'checkbox', checked: isTbd });
+  const sync = () => { input.disabled = box.checked; input.style.opacity = box.checked ? '.5' : ''; };
+  box.addEventListener('change', sync);
+  sync();
+  const wrap = h('div', { class: 'time-control' }, input, h('label', { class: 'check' }, box, 'TBD (time to be determined)'));
+  wrap.read = () => (box.checked ? 'TBD' : (input.value || 'TBD'));
+  return wrap;
+}
+
+// A form control for a schema field, editable in the modal.
+function fieldControl(field, value) {
+  const common = { id: `f-${field.key}`, class: 'input' };
+  switch (field.type) {
+    case TYPES.TEXTAREA:
+      return h('textarea', { ...common, rows: 3, value: value ?? '' });
+    case TYPES.SELECT: {
+      const sel = h('select', common);
+      sel.append(h('option', { value: '' }, '—'));
+      for (const opt of field.options || []) sel.append(h('option', { value: opt, selected: opt === value }, opt));
+      return sel;
+    }
+    case TYPES.REF: {
+      const opts = store.options(field.ref);
+      // Typed reference: free text with a datalist of existing names. The
+      // backend resolves the name (and creates the record if it's new).
+      if (field.input === 'text' || !opts.length) {
+        const dlId = `${field.ref}-datalist`;
+        refreshDatalist(dlId, opts.map((o) => o.label));
+        const input = h('input', {
+          ...common, type: 'text', list: dlId,
+          placeholder: field.placeholder || `Type a ${field.ref.replace(/s$/, '')} name`,
+          value: value ?? '',
+        });
+        input.addEventListener('focus', () => refreshDatalist(dlId, store.options(field.ref).map((o) => o.label)));
+        return input;
+      }
+      const sel = h('select', common);
+      sel.dataset.kind = 'text';
+      sel.append(h('option', { value: '' }, field.required ? '— select —' : '— none —'));
+      for (const opt of opts) sel.append(h('option', { value: opt.value, selected: opt.value === value }, opt.label));
+      return sel;
+    }
+    case TYPES.NUMBER:
+      return h('input', { ...common, type: 'number', step: field.step ?? 'any', value: value ?? '' });
+    case TYPES.CURRENCY:
+      return h('input', { ...common, type: 'number', step: '0.01', min: 0, value: value ?? '' });
+    case TYPES.DATE:
+      return h('input', { ...common, type: 'date', value: value ?? '' });
+    case TYPES.TIME: {
+      if (!field.tbd) return h('input', { ...common, type: 'time', value: value ?? '' });
+      return timeControl(value);
+    }
+    case TYPES.ITEMS:
+      return itemsControl(value);
+    case TYPES.BOOL: {
+      const wrap = h('label', { class: 'switch' });
+      const input = h('input', { type: 'checkbox', checked: Boolean(value) });
+      input.dataset.kind = 'bool';
+      wrap.append(input, h('span', { class: 'track' }), h('span', { class: 'switch-label' }, value ? 'On' : 'Off'));
+      return wrap;
+    }
+    case TYPES.EMAIL:
+      return h('input', { ...common, type: 'email', value: value ?? '' });
+    case TYPES.TEL:
+      return h('input', { ...common, type: 'tel', value: value ?? '' });
+    case TYPES.URL:
+      return h('input', { ...common, type: 'text', placeholder: 'https:// or \\\\server\\share', value: value ?? '' });
+    default:
+      return h('input', { ...common, type: 'text', value: value ?? '' });
+  }
+}
+
+function iconButton(name, onClick, title, extraClass = '') {
+  return h('button', { type: 'button', class: `icon-btn ${extraClass}`, title, 'aria-label': title, onclick: onClick }, icon(name, 17));
+}
+
+// ---- value rendering -----------------------------------------------------
+function displayValue(field, record) {
+  const raw = record[field.key];
+  switch (field.type) {
+    case 'computed': {
+      if (field.key === 'nextDue') {
+        const days = record.daysUntilDue;
+        return h('span', { class: 'inline-gap' }, h('span', {}, fmtDateShort(raw)), dueBadge(days));
+      }
+      return String(raw ?? '');
+    }
+    case TYPES.SELECT:
+      return statusChip(raw);
+    case TYPES.REF: {
+      const nameKey = `${field.key.replace(/Id$/, '')}Name`;
+      return store.label(field.ref, raw) || record?.[nameKey] || h('span', { class: 'muted' }, '—');
+    }
+    case TYPES.DATE: {
+      if (field.showDue) {
+        return h('span', { class: 'inline-gap' }, h('span', {}, fmtDateShort(raw)), dueBadge(daysUntil(raw)));
+      }
+      return fmtDateShort(raw) || h('span', { class: 'muted' }, '—');
+    }
+    case TYPES.TIME:
+      if (String(raw ?? '').toUpperCase() === 'TBD') return h('span', { class: 'badge warn' }, 'TBD');
+      return raw ? h('span', { class: 'mono-time' }, String(raw)) : h('span', { class: 'muted' }, '—');
+    case TYPES.ITEMS:
+      return h('span', { class: 'items-cell', title: itemSummary(raw) }, itemSummary(raw) || h('span', { class: 'muted' }, '—'));
+    case TYPES.CURRENCY:
+      return money(raw) || h('span', { class: 'muted' }, '—');
+    case TYPES.BOOL:
+      return raw ? icon('check', 16) : h('span', { class: 'muted' }, '—');
+    case TYPES.URL:
+      return urlCell(raw);
+    case TYPES.NUMBER:
+      return raw === null || raw === undefined || raw === '' ? h('span', { class: 'muted' }, '—') : String(raw);
+    default:
+      return raw === '' || raw === null || raw === undefined ? h('span', { class: 'muted' }, '—') : String(raw);
+  }
+}
+
+function urlCell(url) {
+  if (!url) return h('span', { class: 'muted' }, '—');
+  const isWeb = /^https?:\/\//i.test(url);
+  const label = h('span', { class: 'path-text', title: url }, url);
+  const node = h('span', { class: 'path-cell' }, label);
+  if (isWeb) {
+    node.append(iconButton('external', () => window.open(url, '_blank', 'noopener'), 'Open link', 'tiny'));
+  } else {
+    node.append(iconButton('link', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('Path copied to clipboard');
+      } catch {
+        toast('Copy failed', 'error');
+      }
+    }, 'Copy network path', 'tiny'));
+  }
+  return node;
+}
+
+// ---- inline editable table ----------------------------------------------
+function dataTable({ collection, items, sort, onSort, rowClass, extraActions, hiddenColumns = [] }) {
+  const meta = collectionByName[collection];
+  const columns = meta.fields.filter((f) => f.table !== false && !hiddenColumns.includes(f.key));
+  const table = h('table', { class: 'data-table' });
+
+  const thead = h('thead');
+  const headRow = h('tr');
+  for (const field of columns) {
+    const active = sort?.key === field.key;
+    headRow.append(h('th', {
+      class: `${field.width === 'wide' ? 'wide' : ''} ${active ? 'sorted' : ''} sortable`,
+      onclick: () => onSort?.(field.key),
+      title: 'Sort by ' + field.label,
+    }, h('span', {}, field.label), active ? h('span', { class: 'sort-arrow' }, sort.dir === 'desc' ? '▾' : '▴') : null));
+  }
+  headRow.append(h('th', { class: 'actions-col' }, ''));
+  thead.append(headRow);
+  table.append(thead);
+
+  const tbody = h('tbody');
+  if (!items.length) {
+    tbody.append(h('tr', {}, h('td', { colspan: columns.length + 1, class: 'empty' },
+      `No ${meta.label.toLowerCase()} yet — click "Add ${meta.singular}" to create one.`)));
+  }
+  for (const record of items) {
+    const tr = h('tr', { class: rowClass ? rowClass(record) : '', dataset: { id: record.id } });
+    for (const field of columns) {
+      tr.append(editableCell(collection, record, field));
+    }
+    const actions = h('td', { class: 'actions-col' });
+    if (extraActions) append(actions, extraActions(record));
+    actions.append(
+      iconButton('edit', () => openForm({ collection, record }), 'Edit'),
+      iconButton('trash', async () => {
+        if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: `"${record[meta.primary]}" will be removed.` })) {
+          await store.remove(collection, record.id);
+          toast('Deleted');
+        }
+      }, 'Delete', 'danger-hover'),
+    );
+    tr.append(actions);
+    tbody.append(tr);
+  }
+  table.append(tbody);
+  return table;
+}
+
+function editableCell(collection, record, field) {
+  const td = h('td', { class: `${field.width === 'wide' ? 'wide' : ''} editable`, tabindex: '0' });
+  const render = () => {
+    clear(td);
+    td.append(displayValue(field, record));
+  };
+  td.append(displayValue(field, record));
+
+  const enterEdit = () => {
+    if (field.type === 'computed') return;
+    const input = inlineControl(field, record[field.key]);
+    clear(td);
+    td.append(input);
+    input.focus();
+    if (input.select) input.select();
+
+    let done = false;
+    const commit = async (save) => {
+      if (done) return;
+      done = true;
+      const value = readInput(input);
+      render();
+      if (save && String(value) !== String(record[field.key] ?? '')) {
+        try {
+          await store.save(collection, record.id, { [field.key]: value });
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      }
+    };
+    input.addEventListener('blur', () => commit(true));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); done = true; render(); }
+    });
+    if (input.tagName === 'SELECT') input.addEventListener('change', () => commit(true));
+  };
+
+  td.addEventListener('click', (e) => {
+    if (td.classList.contains('editing')) return;
+    if (e.target.closest('.icon-btn')) return;
+    enterEdit();
+  });
+  td.addEventListener('keydown', (e) => { if (e.key === 'Enter') enterEdit(); });
+  return td;
+}
+
+function inlineControl(field, value) {
+  const input = fieldControl(field, value);
+  input.classList.add('inline-input');
+  return input;
+}
+
+// ---- kanban board --------------------------------------------------------
+function workBoard({ collection = 'appointments', onOpen }) {
+  const meta = collectionByName[collection];
+  const statusField = meta.fields.find((f) => f.key === meta.statusKey);
+  const columns = statusField.options;
+  const board = h('div', { class: 'board' });
+  const all = store.col(collection);
+
+  for (const status of columns) {
+    const cards = all.filter((r) => (r[meta.statusKey] || columns[0]) === status);
+    const columnEl = h('div', { class: 'board-col', dataset: { status } });
+    columnEl.append(h('div', { class: 'board-col-head' },
+      statusChip(status),
+      h('span', { class: 'count' }, cards.length),
+    ));
+    const bodyEl = h('div', { class: 'board-col-body' });
+    for (const record of cards) bodyEl.append(boardCard(meta, record, onOpen));
+    bodyEl.append(h('div', { class: 'board-empty' }, cards.length ? '' : 'Drop here'));
+    columnEl.append(bodyEl);
+    enableDropTarget(columnEl, meta, status);
+    board.append(columnEl);
+  }
+  return board;
+}
+
+function boardCard(meta, record, onOpen) {
+  const card = h('article', { class: 'card', draggable: 'true', dataset: { id: record.id } });
+  // Top chip: priority if the collection has one, otherwise direction.
+  const topVal = record.priority || record.direction;
+  if (topVal) card.append(h('div', { class: 'card-top' }, statusChip(topVal)));
+  card.append(h('h4', { class: 'card-title' }, titleOf(meta.name, record)));
+  const bits = [];
+  for (const bit of meta.cardBits || []) {
+    const value = record[bit.key];
+    if (value === '' || value === null || value === undefined) continue;
+    if (bit.chip && value !== topVal) {
+      bits.push(h('span', { class: 'card-bit' }, statusChip(value)));
+      continue;
+    }
+    if (bit.items) {
+      const summary = itemSummary(value);
+      if (summary) bits.push(h('span', { class: 'card-bit wide' }, icon('box', 13), summary));
+      continue;
+    }
+    if (bit.icon) bits.push(h('span', { class: 'card-bit' }, icon(bit.icon, 13), bit.date ? fmtDateShort(value) : String(value)));
+  }
+  if (bits.length) card.append(h('div', { class: 'card-bits' }, bits));
+  if (record.date) {
+    const d = daysUntil(record.date);
+    if (d !== null && d < 0 && record.status === 'Scheduled') card.append(dueBadge(d));
+    else if (d === 0) card.append(dueBadge(0));
+  }
+  card.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', record.id);
+    e.dataTransfer.effectAllowed = 'move';
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  card.addEventListener('click', () => onOpen?.(record));
+  return card;
+}
+
+function enableDropTarget(columnEl, meta, status) {
+  columnEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    columnEl.classList.add('over');
+  });
+  columnEl.addEventListener('dragleave', () => columnEl.classList.remove('over'));
+  columnEl.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    columnEl.classList.remove('over');
+    const id = e.dataTransfer.getData('text/plain');
+    const record = store.byId(meta.name, id);
+    if (!record || record[meta.statusKey] === status) return;
+    try {
+      await store.save(meta.name, id, { [meta.statusKey]: status });
+      if (status === 'Done') toast(`"${record[meta.primary]}" marked done`);
+    } catch (err) {
+      toast(err.message, 'error');
+    }
+  });
+}
+
+// ---- misc ----------------------------------------------------------------
+function sectionHeader(title, subtitle, ...actions) {
+  return h('div', { class: 'section-head' },
+    h('div', {}, h('h2', {}, title), subtitle ? h('p', { class: 'muted' }, subtitle) : null),
+    h('div', { class: 'section-actions' }, ...actions),
+  );
+}
+
+function activityList(items, limit = 12) {
+  const list = h('ul', { class: 'activity' });
+  for (const item of items.slice(0, limit)) {
+    list.append(h('li', {},
+      h('span', { class: 'dot' }),
+      h('div', {},
+        h('div', {}, item.text),
+        h('div', { class: 'muted small' }, `${item.actor || 'unknown'} · ${relTime(item.at)}`),
+      ),
+    ));
+  }
+  if (!items.length) list.append(h('li', { class: 'muted' }, 'No activity yet.'));
+  return list;
+}
+
+function kpi(label, value, tone = '', sub = '') {
+  return h('div', { class: `kpi ${tone}` },
+    h('div', { class: 'kpi-value' }, String(value)),
+    h('div', { class: 'kpi-label' }, label),
+    sub ? h('div', { class: 'kpi-sub' }, sub) : null,
+  );
+}
+
+function barChart(entries) {
+  const max = Math.max(1, ...entries.map((e) => e.value));
+  const wrap = h('div', { class: 'bars' });
+  for (const e of entries) {
+    wrap.append(h('div', { class: 'bar-row' },
+      h('span', { class: 'bar-label' }, e.label),
+      h('div', { class: 'bar-track' }, h('div', { class: 'bar-fill', style: { width: `${(e.value / max) * 100}%`, background: e.color || 'var(--accent)' } })),
+      h('span', { class: 'bar-value' }, String(e.value)),
+    ));
+  }
+  return wrap;
+}
+  return { chip, statusChip, dueBadge, toast, confirmDialog, openForm, fieldControl, iconButton, displayValue, dataTable, workBoard, sectionHeader, activityList, kpi, barChart };
+})();
+
+// ═══════════════ js/views.js ═══════════════
+const __mod_js_views_js = (() => {
+  const { h, append, clear, sortItems, fmtDate, fmtDateShort, fmtDayLong, fmtDayStrip, weekStart, shiftDays, daysUntil, relTime, debounce, todayIso, download, kioskUrl } = __mod_js_util_js;
+  const { icon } = __mod_js_icons_js;
+  const { collections, collectionByName, settingsSchema, computeFields, COLORS, TYPES, itemSummary, titleOf, unitNameOf, STATUSES, DIRECTIONS } = __mod_shared_schema_js;
+  const store = __mod_js_store_js;
+  const { getActor, setActor } = __mod_js_api_js;
+  const { chip, statusChip, dueBadge, dataTable, workBoard, openForm, iconButton, sectionHeader, activityList, kpi, barChart, confirmDialog, toast, displayValue, fieldControl } = __mod_js_components_js;
+  const { importLegacyCsvFiles } = __mod_shared_legacy_js;
+// All application views. Each returns a DOM node; app.js decides which to mount.
+
+// ---- shared helpers ------------------------------------------------------
+function ui(ctx, key, defaults) {
+  if (!ctx.ui[key]) ctx.ui[key] = { ...defaults };
+  return ctx.ui[key];
+}
+
+function matchesSearch(record, meta, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  for (const field of meta.fields) {
+    const value = record[field.key];
+    if (value === null || value === undefined) continue;
+    const text = field.type === TYPES.ITEMS ? itemSummary(value) : String(value);
+    if (text.toLowerCase().includes(q)) return true;
+    if (field.type === TYPES.REF) {
+      const label = store.label(field.ref, value) || record.unitName || '';
+      if (label && label.toLowerCase().includes(q)) return true;
+    }
+  }
+  return false;
+}
+
+function toolbar(ctx, key, { searchPlaceholder, filters = [], right = [] }) {
+  const u = ctx.ui[key] || (ctx.ui[key] = {});
+  const search = h('input', {
+    class: 'input search-input',
+    type: 'search',
+    placeholder: searchPlaceholder,
+    value: u.search || '',
+    oninput: debounce((e) => { u.search = e.target.value; ctx.rerender(); }, 180),
+  });
+  const bar = h('div', { class: 'toolbar' },
+    h('div', { class: 'toolbar-left' }, h('span', { class: 'search-wrap' }, icon('search', 16), search)),
+  );
+  for (const filter of filters) {
+    const select = h('select', {
+      class: 'input compact',
+      onchange: (e) => { u[filter.key] = e.target.value; ctx.rerender(); },
+    });
+    select.append(h('option', { value: '' }, filter.label));
+    for (const opt of filter.options) {
+      select.append(h('option', { value: opt.value, selected: u[filter.key] === opt.value }, opt.label));
+    }
+    bar.append(select);
+  }
+  if (right.length) bar.append(h('div', { class: 'toolbar-right' }, right));
+  return bar;
+}
+
+function addButton(collection) {
+  const meta = collectionByName[collection];
+  return h('button', { class: 'btn primary', onclick: () => openForm({ collection }) },
+    icon('plus', 16), `Add ${meta.singular}`);
+}
+
+const byTime = (a, b) => String(a.time || '').localeCompare(String(b.time || '')) || String(a.date).localeCompare(String(b.date));
+const byDateTime = (a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
+
+function withComputed(records) {
+  return records.map((r) => ({ ...r, ...computeFields('appointments', r) }));
+}
+
+function unitLabel(record) {
+  return record.unitName || store.label('units', record.unitId) || '—';
+}
+
+// ---- Appointment cards & actions ------------------------------------------
+
+// Contextual quick actions for an appointment's current status.
+function statusActions(record, extra = []) {
+  const actions = [...extra];
+  const advance = (status, label, ic, cls = '') => h('button', {
+    class: `mini-btn ${cls}`,
+    onclick: async () => {
+      await store.save('appointments', record.id, { status });
+      toast(`Marked ${label.toLowerCase()}`);
+    },
+  }, icon(ic, 14), label);
+
+  if (record.status === 'Scheduled') {
+    actions.push(advance('Arrived', 'Arrived', 'check', 'good'));
+    actions.push(advance('No-show', 'No-show', 'x', 'danger'));
+  } else if (record.status === 'Arrived') {
+    actions.push(advance('Completed', 'Complete', 'check', 'good'));
+    actions.push(advance('Scheduled', 'Reset', 'undo'));
+  } else {
+    actions.push(advance('Scheduled', 'Reopen', 'undo'));
+  }
+  return actions;
+}
+
+function deleteButton(record, label = 'Appointment') {
+  return iconButton('trash', async () => {
+    if (await confirmDialog({ title: `Delete ${label}?`, message: `"${unitLabel(record)} — ${fmtDateShort(record.date)} ${record.time}" will be removed.` })) {
+      await store.remove('appointments', record.id);
+      toast('Deleted');
+    }
+  }, 'Delete', 'danger-hover');
+}
+
+// Full appointment card used on the daily board and in the overdue banner.
+function apptCard(record, { compact = false, planning = false } = {}) {
+  const dirIcon = record.direction === 'Drop-off' ? 'arrowdown' : 'arrowup';
+  const due = daysUntil(record.date);
+  const card = h('div', { class: `appt ${record.status === 'Completed' || record.status === 'Cancelled' ? 'dim' : ''}`, dataset: { id: record.id } });
+  card.append(h('div', { class: 'appt-row' },
+    h('span', { class: `appt-time mono-time ${String(record.time).toUpperCase() === 'TBD' ? 'tbd' : ''}` }, record.time || '--:--'),
+    h('span', { class: 'chip', style: { '--chip': COLORS[record.direction] } }, icon(dirIcon, 13), record.direction),
+    statusChip(record.status),
+    // Overdue stays red; on the planning board upcoming visits show "In 3d" etc.
+    record.overdue || (planning && due > 0) ? dueBadge(due) : null,
+  ));
+  const unitLine = h('div', { class: 'appt-unit' }, unitLabel(record));
+  if (record.poc) unitLine.append(h('span', { class: 'muted small' }, ` · POC ${record.poc}`));
+  if (!compact && record.date !== todayIso()) unitLine.append(h('span', { class: 'muted small' }, ` · ${fmtDateShort(record.date)}`));
+  card.append(unitLine);
+
+  if (record.items?.length) {
+    const list = h('ul', { class: 'appt-items' });
+    for (const it of record.items) {
+      list.append(h('li', {}, h('b', {}, `${it.qty}×`), ` ${it.eqType || 'Equipment'}`, it.description ? h('span', { class: 'muted' }, ` — ${it.description}`) : null));
+    }
+    card.append(list);
+  }
+  if (record.notes) card.append(h('div', { class: 'appt-notes' }, record.notes));
+
+  const actions = h('div', { class: 'appt-actions' }, statusActions(record));
+  actions.append(
+    iconButton('edit', () => openForm({ collection: 'appointments', record }), 'Edit'),
+    deleteButton(record),
+  );
+  card.append(actions);
+  return card;
+}
+
+// ---- Daily Board (default view) -------------------------------------------
+function boardView(ctx) {
+  const u = ui(ctx, 'board', { date: todayIso() });
+  const all = withComputed(store.col('appointments'));
+  const weapons = store.col('weapons');
+  const today = todayIso();
+  const history = u.date < today;
+
+  // Planning mode (today or a future date): every appointment is on the board
+  // from the day it is scheduled until it is dropped off or picked up —
+  // upcoming visits included, so the shop can plan ahead. History mode (a past
+  // date): that day's record, completed visits included.
+  const open = all.filter((r) => r.status === 'Scheduled' || r.status === 'Arrived');
+  const day = history
+    ? all.filter((r) => r.date === u.date && r.status !== 'Cancelled')
+    : open;
+  const inbound = day.filter((r) => r.direction === 'Drop-off').sort(byDateTime);
+  const outbound = day.filter((r) => r.direction === 'Pickup').sort(byDateTime);
+  const overdue = all.filter((r) => r.overdue).sort(byDateTime);
+  const inboundQty = inbound.reduce((n, r) => n + r.totalQty, 0);
+  const outboundQty = outbound.reduce((n, r) => n + r.totalQty, 0);
+
+  const root = h('div', { class: 'view board-view' });
+
+  // Date navigation
+  const nav = h('div', { class: 'toolbar board-nav' },
+    h('div', { class: 'toolbar-left' },
+      h('button', { class: 'btn ghost', onclick: () => { u.date = shiftDays(u.date, -1); ctx.rerender(); } }, icon('chevron', 16), 'Prev'),
+      h('input', { class: 'input compact', type: 'date', value: u.date, onchange: (e) => { u.date = e.target.value || todayIso(); ctx.rerender(); } }),
+      h('button', { class: 'btn ghost', onclick: () => { u.date = shiftDays(u.date, 1); ctx.rerender(); } }, 'Next', icon('chevron', 16)),
+      u.date !== todayIso() ? h('button', { class: 'btn', onclick: () => { u.date = todayIso(); ctx.rerender(); } }, 'Today') : null,
+      h('span', { class: `board-day-label ${u.date === today ? 'today' : ''}` },
+        fmtDayLong(u.date)
+        + (u.date === today ? ' · TODAY' : history ? '' : ' · showing all open'),
+      ),
+    ),
+    h('div', { class: 'toolbar-right' },
+      h('button', { class: 'btn primary', onclick: () => openForm({ collection: 'appointments', record: { date: u.date, direction: 'Drop-off', status: 'Scheduled' } }) },
+        icon('plus', 16), 'New Appointment'),
+    ),
+  );
+  root.append(nav);
+
+  root.append(h('div', { class: 'kpi-row kpi-row-5' },
+    ...(history ? [
+      kpi('Appointments', day.length, day.length ? 'accent' : '', `${inbound.length} in · ${outbound.length} out`),
+      kpi('Inbound Items', inboundQty, inboundQty ? 'good' : '', 'drop-offs that day'),
+      kpi('Outbound Items', outboundQty, outboundQty ? 'warn' : '', 'pickups that day'),
+    ] : [
+      kpi('Open Appointments', day.length, day.length ? 'accent' : '', `${inbound.length} drop-offs · ${outbound.length} pickups`),
+      kpi('Incoming Items', inboundQty, inboundQty ? 'good' : '', 'scheduled, not yet dropped off'),
+      kpi('Outgoing Items', outboundQty, outboundQty ? 'warn' : '', 'scheduled, not yet picked up'),
+    ]),
+    kpi('Overdue', overdue.length, overdue.length ? 'bad' : '', 'scheduled, past due'),
+    kpi('Weapons On Hand', weapons.reduce((n, w) => n + (Number(w.count) || 0), 0), '', `${weapons.length} types`),
+  ));
+
+  // Friendly first-run guidance while the workspace is still empty.
+  if (!all.length && !weapons.length && !store.col('units').length) {
+    root.append(h('div', { class: 'panel welcome' },
+      h('div', { class: 'panel-head' }, icon('activity', 17), h('h3', {}, 'Welcome — your board is empty')),
+      h('div', { class: 'panel-body' },
+        h('ul', { class: 'welcome-tips' },
+          h('li', {}, h('b', {}, 'Add your first appointment'), ' — set the date, then type the unit name (e.g. ', h('code', {}, 'A/2-1 IN'), '). New units are created automatically as you type.'),
+          h('li', {}, h('b', {}, 'Pick a time, or mark it TBD'), ' — if the slot isn\'t pinned down yet, tick ' , h('b', {}, 'TBD'), ' and the card shows it without counting as overdue.'),
+          h('li', {}, h('b', {}, 'Drop-off or Pickup'), ' — each appointment is one flow, with any number of equipment lines (type + qty + description).'),
+          h('li', {}, h('b', {}, 'Track weapons'), ' — add each weapon type with a count; use − / ＋ on the Weapons page as arms move.'),
+          h('li', {}, h('b', {}, 'Bring over your old data'), ' — Settings → Import from the old Streamlit tracker takes your equipment/weapons/notes CSVs.'),
+        ),
+        h('div', { class: 'row-actions' },
+          h('button', { class: 'btn primary', onclick: () => openForm({ collection: 'appointments', record: { date: u.date } }) }, icon('plus', 16), 'New Appointment'),
+          h('button', { class: 'btn ghost', onclick: () => openForm({ collection: 'weapons' }) }, icon('target', 16), 'Add Weapon Type'),
+          h('button', { class: 'btn ghost', onclick: () => { location.hash = '#/settings'; } }, icon('upload', 16), 'Import CSVs'),
+        ),
+      ),
+    ));
+  }
+
+  if (overdue.length) {
+    const banner = h('div', { class: 'overdue-banner' },
+      h('div', { class: 'overdue-head' }, icon('alert', 18), `Overdue — ${overdue.length} appointment${overdue.length === 1 ? '' : 's'} still open`),
+      h('div', { class: 'overdue-list' },
+        ...overdue.slice(0, 6).map((r) => h('div', { class: 'overdue-row' },
+          h('span', { class: 'mono-time' }, r.time),
+          h('span', { class: 'strong' }, unitLabel(r)),
+          h('span', { class: 'chip', style: { '--chip': COLORS[r.direction] } }, r.direction),
+          h('span', { class: 'muted small' }, fmtDateShort(r.date)),
+          h('span', { class: 'spacer' }),
+          h('button', { class: 'mini-btn good', onclick: async () => { await store.save('appointments', r.id, { status: 'Arrived' }); toast('Marked arrived'); } }, icon('check', 14), 'Arrived'),
+          h('button', {
+            class: 'mini-btn', title: 'Push one day forward',
+            onclick: async () => { await store.save('appointments', r.id, { date: shiftDays(r.date, 1) }); toast('Moved to next day'); },
+          }, icon('move', 14), '+1 day'),
+          iconButton('edit', () => openForm({ collection: 'appointments', record: r }), 'Edit'),
+        )),
+        overdue.length > 6 ? h('div', { class: 'muted small overdue-more' }, `+${overdue.length - 6} more — see Schedule`) : null,
+      ),
+    );
+    root.append(banner);
+  }
+
+  // Inbound / outbound columns
+  const columns = h('div', { class: 'board-cols' });
+  const makeCol = (title, sub, dirIcon, tone, cards) => {
+    const col = h('div', { class: 'board-col' });
+    col.append(h('div', { class: `board-col-title ${tone}` }, icon(dirIcon, 18), h('span', {}, title), h('span', { class: 'count' }, cards.length), h('span', { class: 'muted small col-sub' }, sub)));
+    const body = h('div', { class: 'board-col-body' });
+    if (!cards.length) {
+      body.append(h('div', { class: 'board-empty-day' }, history
+        ? `Nothing ${tone === 'in' ? 'dropping off' : 'being picked up'} on this date.`
+        : `No open ${tone === 'in' ? 'drop-offs' : 'pickups'} — new ones appear here the moment they're scheduled.`));
+    }
+    let lastDate = '';
+    for (const r of cards) {
+      // Planning mode groups the pipeline by day so upcoming visits read at a glance.
+      if (!history && r.date !== lastDate) {
+        lastDate = r.date;
+        body.append(h('div', { class: `col-day-sep ${r.date === today ? 'today' : ''}` }, r.date === today ? 'TODAY' : fmtDayStrip(r.date)));
+      }
+      body.append(apptCard(r, { planning: !history }));
+    }
+    col.append(body);
+    return col;
+  };
+  columns.append(makeCol('INBOUND', history ? 'units dropping equipment off' : 'from scheduled until dropped off', 'arrowdown', 'in', inbound));
+  columns.append(makeCol('OUTBOUND', history ? 'units picking equipment up' : 'from scheduled until picked up', 'arrowup', 'out', outbound));
+  root.append(columns);
+
+  // Shop notes strip
+  const notes = store.col('notes').slice(0, 6);
+  if (notes.length) {
+    const panel = h('div', { class: 'panel' });
+    panel.append(h('div', { class: 'panel-head' },
+      icon('note', 17), h('h3', {}, 'Shop Notes'),
+      h('span', { class: 'spacer' }),
+      h('button', { class: 'btn ghost mini', onclick: () => { location.hash = '#/notes'; } }, 'All notes'),
+    ));
+    const grid = h('div', { class: 'note-strip' });
+    for (const n of notes) {
+      grid.append(h('div', { class: 'note-card' },
+        h('div', { class: 'note-text' }, n.message),
+        h('div', { class: 'muted small' }, relTime(n.createdAt)),
+      ));
+    }
+    panel.append(h('div', { class: 'panel-body' }, grid));
+    root.append(panel);
+  }
+
+  return root;
+}
+
+// ---- Schedule (appointments) ----------------------------------------------
+function appointmentsView(ctx) {
+  const u = ui(ctx, 'appointments', {
+    mode: 'week', search: '', status: '', direction: '', unit: '',
+    weekStart: weekStart(todayIso()), sort: { key: 'date', dir: 'asc' },
+  });
+  const meta = collectionByName.appointments;
+  const root = h('div', { class: 'view' });
+
+  root.append(sectionHeader('Schedule', 'Drop-offs and pickups by unit and equipment type',
+    h('div', { class: 'segmented' },
+      h('button', { class: `seg ${u.mode === 'week' ? 'active' : ''}`, onclick: () => { u.mode = 'week'; ctx.rerender(); } }, icon('calendar', 15), 'Week'),
+      h('button', { class: `seg ${u.mode === 'board' ? 'active' : ''}`, onclick: () => { u.mode = 'board'; ctx.rerender(); } }, icon('grid', 15), 'Status Board'),
+      h('button', { class: `seg ${u.mode === 'table' ? 'active' : ''}`, onclick: () => { u.mode = 'table'; ctx.rerender(); } }, icon('list', 15), 'Table'),
+    ),
+    addButton('appointments'),
+  ));
+
+  root.append(toolbar(ctx, 'appointments', {
+    searchPlaceholder: 'Search unit, equipment, notes…',
+    filters: [
+      { key: 'unit', label: 'All units', options: store.options('units') },
+      { key: 'direction', label: 'All flows', options: DIRECTIONS.map((v) => ({ value: v, label: v })) },
+      { key: 'status', label: 'All statuses', options: STATUSES.map((v) => ({ value: v, label: v })) },
+    ],
+  }));
+
+  let items = withComputed(store.col('appointments')).filter((r) => matchesSearch(r, meta, u.search));
+  if (u.status) items = items.filter((r) => r.status === u.status);
+  if (u.direction) items = items.filter((r) => r.direction === u.direction);
+  if (u.unit) items = items.filter((r) => r.unitId === u.unit);
+  const allCount = items.length;
+
+  const body = h('div', { class: 'view-body' });
+
+  if (u.mode === 'week') {
+    // Week navigation
+    body.append(h('div', { class: 'toolbar week-nav' },
+      h('div', { class: 'toolbar-left' },
+        h('button', { class: 'btn ghost', onclick: () => { u.weekStart = shiftDays(u.weekStart, -7); ctx.rerender(); } }, icon('chevron', 16), 'Prev week'),
+        h('button', { class: 'btn', onclick: () => { u.weekStart = weekStart(todayIso()); ctx.rerender(); } }, 'This week'),
+        h('button', { class: 'btn ghost', onclick: () => { u.weekStart = shiftDays(u.weekStart, 7); ctx.rerender(); } }, 'Next week', icon('chevron', 16)),
+      ),
+      h('span', { class: 'muted small' }, `${fmtDayStrip(u.weekStart)} – ${fmtDayStrip(shiftDays(u.weekStart, 6))} · drag cards on the Status Board to change status`),
+    ));
+
+    // Filters apply to the strip as well
+    const weekItems = items;
+    const days = [...Array(7)].map((_, i) => shiftDays(u.weekStart, i));
+    const strip = h('div', { class: 'day-strip' });
+    for (const dayIso of days) {
+      const dayAppts = weekItems
+        .filter((r) => r.date === dayIso && r.status !== 'Cancelled')
+        .sort(byTime);
+      const isToday = dayIso === todayIso();
+      const card = h('div', { class: `day-card ${isToday ? 'today' : ''}` });
+      card.append(h('div', { class: 'day-head' },
+        h('span', { class: 'day-name' }, fmtDayStrip(dayIso)),
+        h('span', { class: `count ${dayAppts.length ? '' : 'zero'}` }, dayAppts.length),
+      ));
+      for (const r of dayAppts) {
+        const dirIcon = r.direction === 'Drop-off' ? 'arrowdown' : 'arrowup';
+        card.append(h('button', {
+          class: `day-chip ${r.status === 'Completed' ? 'dim' : ''}`,
+          style: { '--chip': COLORS[r.direction] },
+          title: `${r.time} ${unitLabel(r)} — ${itemSummary(r.items) || 'no equipment listed'}`,
+          onclick: () => openForm({ collection: 'appointments', record: r }),
+        },
+          h('span', { class: 'day-chip-time mono-time' }, r.time),
+          h('span', { class: 'day-chip-unit' }, unitLabel(r)),
+          h('span', { class: 'day-chip-items muted small' }, itemSummary(r.items) || '—'),
+          icon(dirIcon, 13),
+        ));
+      }
+      if (!dayAppts.length) card.append(h('div', { class: 'day-empty' }, '—'));
+      strip.append(card);
+    }
+    body.append(strip);
+  } else if (u.mode === 'board') {
+    body.append(workBoard({ collection: 'appointments', onOpen: (record) => openForm({ collection: 'appointments', record }) }));
+  } else {
+    items = sortItems(items, u.sort, { date: (r) => `${r.date || ''} ${r.time || ''}` });
+    body.append(h('div', { class: 'table-wrap' }, dataTable({
+      collection: 'appointments',
+      items,
+      sort: u.sort,
+      onSort: (key) => { u.sort = { key, dir: u.sort?.key === key && u.sort.dir === 'asc' ? 'desc' : 'asc' }; ctx.rerender(); },
+      extraActions: (r) => statusActions(r).slice(0, 1),
+      rowClass: (r) => r.overdue ? 'row-bad' : r.status === 'Arrived' ? 'row-warn' : r.status === 'Completed' ? 'row-done' : '',
+    })));
+  }
+
+  root.append(body);
+  root.append(h('div', { class: 'muted small' }, `${allCount} appointment${allCount === 1 ? '' : 's'} shown`));
+  return root;
+}
+
+// ---- Weapons ---------------------------------------------------------------
+function weaponsView(ctx) {
+  const u = ui(ctx, 'weapons', { search: '' });
+  const root = h('div', { class: 'view' });
+  const weapons = store.col('weapons');
+  const total = weapons.reduce((n, w) => n + (Number(w.count) || 0), 0);
+  const biggest = [...weapons].sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))[0];
+
+  root.append(sectionHeader('Weapons', 'Arms-room inventory by weapon type',
+    h('button', { class: 'btn primary', onclick: () => openForm({ collection: 'weapons' }) }, icon('plus', 16), 'Add Weapon Type'),
+  ));
+
+  // Quick add row
+  const nameInput = h('input', { class: 'input', placeholder: 'Weapon type — e.g. M4 Carbine' });
+  const countInput = h('input', { class: 'input compact', type: 'number', min: '0', step: '1', placeholder: 'Count', style: { maxWidth: '110px' } });
+  const quickAdd = h('div', { class: 'toolbar' },
+    h('div', { class: 'toolbar-left' },
+      h('span', { class: 'search-wrap' }, icon('target', 16), nameInput),
+      countInput,
+      h('button', {
+        class: 'btn primary', onclick: async () => {
+          const name = nameInput.value.trim();
+          if (!name) { toast('Give the weapon type a name', 'error'); nameInput.focus(); return; }
+          await store.save('weapons', null, { name, count: Math.max(0, Math.round(Number(countInput.value) || 0)) });
+          toast(`Added ${name}`);
+          nameInput.value = ''; countInput.value = '';
+          ctx.rerender();
+        },
+      }, icon('plus', 16), 'Add'),
+    ),
+  );
+  root.append(quickAdd);
+
+  root.append(h('div', { class: 'kpi-row kpi-row-3' },
+    kpi('Types Tracked', weapons.length, weapons.length ? 'accent' : ''),
+    kpi('Total On Hand', total, total ? '' : 'warn', 'all weapon types'),
+    kpi('Largest Type', biggest ? biggest.count : 0, '', biggest ? biggest.name : '—'),
+  ));
+
+  // Distribution chart
+  if (weapons.length) {
+    const chart = h('div', { class: 'panel' });
+    chart.append(h('div', { class: 'panel-head' }, icon('activity', 17), h('h3', {}, 'Count by Weapon Type')));
+    chart.append(barChart([...weapons]
+      .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0))
+      .map((w) => ({ label: w.name, value: Number(w.count) || 0, color: 'var(--accent)' }))));
+    root.append(chart);
+  }
+
+  // Search + card grid
+  const q = (u.search || '').toLowerCase();
+  const list = weapons
+    .filter((w) => !q || String(w.name).toLowerCase().includes(q) || String(w.notes || '').toLowerCase().includes(q))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true }));
+
+  if (!weapons.length) {
+    root.append(h('div', { class: 'panel' }, h('div', { class: 'panel-body muted' },
+      'No weapon types yet — add the first one above. Use −/＋ on each card to adjust counts as arms are signed in and out.')));
+  } else if (!list.length) {
+    root.append(h('div', { class: 'panel' }, h('div', { class: 'panel-body muted' }, `No weapon types match "${u.search}".`)));
+  } else {
+    const grid = h('div', { class: 'weapon-grid' });
+    for (const w of list) {
+      const card = h('div', { class: 'weapon-card', dataset: { id: w.id } });
+      card.append(h('div', { class: 'weapon-name' }, icon('target', 15), w.name));
+      card.append(h('div', { class: 'weapon-count' }, String(Number(w.count) || 0)));
+      if (w.notes) card.append(h('div', { class: 'weapon-notes muted small', title: w.notes }, w.notes));
+      const actions = h('div', { class: 'weapon-actions' },
+        iconButton('minus', async () => {
+          await store.save('weapons', w.id, { count: Math.max(0, (Number(w.count) || 0) - 1) });
+        }, 'Remove one'),
+        h('span', { class: 'muted small' }, 'on hand'),
+        iconButton('plus', async () => {
+          await store.save('weapons', w.id, { count: (Number(w.count) || 0) + 1 });
+        }, 'Add one'),
+        h('span', { class: 'spacer' }),
+        iconButton('edit', () => openForm({ collection: 'weapons', record: w }), 'Edit'),
+        iconButton('trash', async () => {
+          if (await confirmDialog({ title: `Delete ${w.name}?`, message: 'The weapon type and its count will be removed.' })) {
+            await store.remove('weapons', w.id);
+            toast('Deleted');
+          }
+        }, 'Delete', 'danger-hover'),
+      );
+      card.append(actions);
+      grid.append(card);
+    }
+    root.append(grid);
+  }
+  return root;
+}
+
+// ---- Shop notes -------------------------------------------------------------
+function notesView(ctx) {
+  const root = h('div', { class: 'view' });
+  const notes = store.col('notes');
+
+  root.append(sectionHeader('Shop Notes', 'The pass-down board — everything the shop needs to remember'));
+
+  // Composer
+  const input = h('textarea', { class: 'input', rows: 2, placeholder: 'Write a note for the shop… (Enter to post, Shift+Enter for a new line)' });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+  });
+  const form = h('form', {
+    class: 'note-composer', onsubmit: async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+      await store.save('notes', null, { message });
+      toast('Note posted');
+      input.value = '';
+      ctx.rerender();
+    },
+  }, input, h('button', { class: 'btn primary', type: 'submit' }, icon('pin', 16), 'Post Note'));
+  root.append(form);
+
+  const list = h('div', { class: 'notes-list' });
+  if (!notes.length) {
+    list.append(h('div', { class: 'panel' }, h('div', { class: 'panel-body muted' }, 'No notes yet — post the first one above.')));
+  }
+  for (const n of notes) {
+    const card = h('div', { class: 'note-card wide', dataset: { id: n.id } },
+      h('div', { class: 'note-text' }, n.message),
+      h('div', { class: 'note-foot' },
+        h('span', { class: 'muted small' }, fmtDate((n.createdAt || '').slice(0, 10)), ` · posted ${relTime(n.createdAt)}`),
+        h('span', { class: 'spacer' }),
+        iconButton('edit', () => openForm({ collection: 'notes', record: n }), 'Edit'),
+        iconButton('trash', async () => {
+          if (await confirmDialog({ title: 'Delete note?', message: `"${n.message.slice(0, 60)}${n.message.length > 60 ? '…' : ''}" will be removed.` })) {
+            await store.remove('notes', n.id);
+            toast('Deleted');
+          }
+        }, 'Delete', 'danger-hover'),
+      ),
+    );
+    list.append(card);
+  }
+  root.append(list);
+  return root;
+}
+
+// ---- Overview ---------------------------------------------------------------
+function overviewView(ctx) {
+  const all = withComputed(store.col('appointments'));
+  const today = todayIso();
+  const day = all.filter((r) => r.date === today && r.status !== 'Cancelled');
+  const overdue = all.filter((r) => r.overdue);
+  const noShows = all.filter((r) => r.status === 'No-show');
+  const weapons = store.col('weapons');
+  const notes = store.col('notes');
+
+  const inboundQty = day.filter((r) => r.direction === 'Drop-off').reduce((n, r) => n + r.totalQty, 0);
+  const outboundQty = day.filter((r) => r.direction === 'Pickup').reduce((n, r) => n + r.totalQty, 0);
+  const totalWeapons = weapons.reduce((n, w) => n + (Number(w.count) || 0), 0);
+
+  const root = h('div', { class: 'view overview' });
+
+  root.append(h('div', { class: 'kpi-row' },
+    kpi("Today's Appointments", day.length, day.length ? 'accent' : '', `${fmtDateShort(today)}`),
+    kpi('Inbound Items', inboundQty, inboundQty ? 'good' : '', 'drop-offs today'),
+    kpi('Outbound Items', outboundQty, outboundQty ? 'warn' : '', 'pickups today'),
+    kpi('Overdue', overdue.length, overdue.length ? 'bad' : '', 'still scheduled, past due'),
+    kpi('Weapons On Hand', totalWeapons, '', `${weapons.length} types tracked`),
+    kpi('Open Notes', notes.length, notes.length ? '' : '', 'on the pass-down board'),
+  ));
+
+  const grid = h('div', { class: 'grid-2' });
+
+  // Attention needed
+  const attention = h('div', { class: 'panel' });
+  attention.append(h('div', { class: 'panel-head' }, icon('alert', 17), h('h3', {}, 'Attention Needed')));
+  const attList = h('ul', { class: 'list' });
+  const push = (tone, text, sub, onClick) => attList.append(h('li', { class: `list-item ${tone}`, onclick: onClick },
+    h('span', { class: `pulse ${tone}` }),
+    h('div', { class: 'li-body' }, h('div', { class: 'li-title' }, text), sub ? h('div', { class: 'muted small' }, sub) : null),
+    onClick ? icon('chevron', 16) : null,
+  ));
+  for (const r of overdue.slice(0, 6)) push('bad', `${unitLabel(r)} — ${r.direction}`, `${fmtDateShort(r.date)} ${r.time} · ${itemSummary(r.items) || 'no items'}`, () => ctx.focusRecord('appointments', r.id));
+  for (const r of noShows.slice(0, 4)) push('warn', `${unitLabel(r)} — no-show`, `${fmtDateShort(r.date)} ${r.time} · reschedule?`, () => ctx.focusRecord('appointments', r.id));
+  if (!attList.children.length) attList.append(h('li', { class: 'list-item empty-ok' }, icon('check', 16), h('div', {}, 'All clear — nothing needs attention.')));
+  attention.append(attList);
+  grid.append(attention);
+
+  // Upcoming (7 days)
+  const upcoming = h('div', { class: 'panel' });
+  upcoming.append(h('div', { class: 'panel-head' }, icon('calendar', 17), h('h3', {}, 'Next 7 Days')));
+  const upList = h('ul', { class: 'list' });
+  const horizon = shiftDays(today, 7);
+  const events = all
+    .filter((r) => r.date >= today && r.date <= horizon && r.status !== 'Cancelled')
+    .sort(byDateTime)
+    .slice(0, 12);
+  for (const r of events) {
+    upList.append(h('li', { class: 'list-item', onclick: () => ctx.focusRecord('appointments', r.id) },
+      h('span', { class: 'tag', style: { '--chip': COLORS[r.direction] } }, r.direction === 'Drop-off' ? 'IN' : 'OUT'),
+      h('div', { class: 'li-body' },
+        h('div', { class: 'li-title' }, `${unitLabel(r)} · ${r.time}`),
+        h('div', { class: 'muted small' }, `${fmtDateShort(r.date)} · ${itemSummary(r.items) || 'no equipment listed'}`),
+      ),
+      dueBadge(daysUntil(r.date)),
+    ));
+  }
+  if (!events.length) upList.append(h('li', { class: 'list-item' }, h('div', { class: 'muted' }, 'Nothing scheduled in the next seven days.')));
+  upcoming.append(upList);
+  grid.append(upcoming);
+
+  // Weapons chart
+  const chartPanel = h('div', { class: 'panel' });
+  chartPanel.append(h('div', { class: 'panel-head' }, icon('target', 17), h('h3', {}, 'Weapons on Hand by Type')));
+  const sorted = [...weapons].sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0));
+  chartPanel.append(sorted.length
+    ? barChart(sorted.map((w) => ({ label: w.name, value: Number(w.count) || 0, color: 'var(--accent)' })))
+    : h('div', { class: 'panel-body muted' }, 'No weapon types tracked yet.'));
+  grid.append(chartPanel);
+
+  // Activity
+  const activity = h('div', { class: 'panel' });
+  activity.append(h('div', { class: 'panel-head' }, icon('clock', 17), h('h3', {}, 'Recent Activity'), h('span', { class: 'spacer' }), h('span', { class: 'muted small' }, `${store.state.clients} screen${store.state.clients === 1 ? '' : 's'} connected`)));
+  activity.append(activityList(store.state.activity, 10));
+  grid.append(activity);
+
+  root.append(grid);
+  return root;
+}
+
+function absDays(dateStr) {
+  const d = daysUntil(dateStr);
+  if (d === null) return '';
+  const n = Math.abs(d);
+  return `${n} day${n === 1 ? '' : 's'}`;
+}
+
+// ---- Generic collection view (units, equipment types) ----------------------
+function collectionView(ctx, collection) {
+  const meta = collectionByName[collection];
+  const defaults = { search: '', sort: meta.defaultSort, status: '' };
+  const u = ui(ctx, collection, defaults);
+  const root = h('div', { class: 'view' });
+
+  const filters = [];
+  if (meta.statusKey) {
+    const field = meta.fields.find((f) => f.key === meta.statusKey);
+    filters.push({ key: 'status', label: `All ${field.label.toLowerCase()}`, options: field.options.map((v) => ({ value: v, label: v })) });
+  }
+
+  // Units show how many open appointments reference them.
+  const right = [];
+  if (collection === 'units') {
+    right.push(h('button', { class: 'btn primary', onclick: () => openForm({ collection: 'appointments' }) }, icon('calendar', 16), 'New Appointment'));
+  }
+  right.push(addButton(collection));
+
+  root.append(sectionHeader(meta.label, meta.label === 'Units' ? 'Units you type when scheduling are added here automatically' : '', ...right));
+  root.append(toolbar(ctx, collection, {
+    searchPlaceholder: `Search ${meta.label.toLowerCase()}…`,
+    filters,
+  }));
+
+  if (collection === 'units') {
+    const appts = store.col('appointments');
+    const units = store.col('units');
+    const openAppts = appts.filter((r) => r.status !== 'Completed' && r.status !== 'Cancelled');
+    root.append(h('div', { class: 'mini-kpis mini-kpis-3' },
+      kpi('Units on Roster', units.length, 'accent'),
+      kpi('Open Appointments', openAppts.length, openAppts.length ? 'warn' : ''),
+      kpi('Units with Open Items', new Set(openAppts.map((r) => r.unitId)).size, ''),
+    ));
+  }
+
+  let items = store.col(collection).filter((r) => matchesSearch(r, meta, u.search));
+  if (u.status && meta.statusKey) items = items.filter((r) => r[meta.statusKey] === u.status);
+  items = sortItems(items, u.sort);
+
+  const extraActions = collection === 'units'
+    ? (r) => [h('button', {
+        class: 'mini-btn', title: 'Schedule for this unit',
+        onclick: () => openForm({ collection: 'appointments', record: { unitId: r.id } }),
+      }, icon('plus', 14), 'Schedule')]
+    : null;
+
+  const wrap = h('div', { class: 'table-wrap' }, dataTable({
+    collection,
+    items,
+    sort: u.sort,
+    onSort: (key) => { u.sort = { key, dir: u.sort?.key === key && u.sort.dir === 'asc' ? 'desc' : 'asc' }; ctx.rerender(); },
+    extraActions,
+    rowClass: () => '',
+  }));
+  root.append(h('div', { class: 'view-body' }, wrap));
+  return root;
+}
+
+// ---- Activity --------------------------------------------------------------
+function activityView(ctx) {
+  const root = h('div', { class: 'view' });
+  root.append(sectionHeader('Activity', 'Everything that has changed, newest first'));
+  const panel = h('div', { class: 'panel' });
+  panel.append(activityList(store.state.activity, store.state.activity.length));
+  root.append(h('div', { class: 'view-body' }, panel));
+  return root;
+}
+
+// ---- Settings --------------------------------------------------------------
+function settingsView(ctx) {
+  const s = store.state.settings;
+  const root = h('div', { class: 'view' });
+  root.append(sectionHeader('Settings', 'Shop identity, equipment types, wall display and data management'));
+  const body = h('div', { class: 'view-body settings-grid' });
+
+  // Shop settings
+  const card = h('div', { class: 'panel' });
+  card.append(h('div', { class: 'panel-head' }, icon('settings', 17), h('h3', {}, 'Shop & Display')));
+  const form = h('form', { class: 'form-grid', onsubmit: async (e) => {
+    e.preventDefault();
+    const patch = {};
+    for (const field of settingsSchema) {
+      const input = form.querySelector(`[name="${field.key}"]`);
+      if (!input) continue;
+      patch[field.key] = field.type === TYPES.BOOL ? input.checked : (field.type === TYPES.NUMBER ? Number(input.value) : input.value);
+    }
+    await store.saveSettings(patch);
+    toast('Settings saved');
+    ctx.rerender();
+  } });
+  for (const field of settingsSchema) {
+    form.append(h('label', { class: `field ${field.type === TYPES.TEXTAREA ? 'full' : ''}` },
+      h('span', { class: 'field-label' }, field.label),
+      controlForSettings(field, s[field.key]),
+    ));
+  }
+  card.append(h('div', { class: 'panel-body' }, form));
+  card.append(h('div', { class: 'panel-foot' }, h('button', { class: 'btn primary', onclick: () => form.requestSubmit() }, icon('save', 16), 'Save Settings')));
+  body.append(card);
+
+  // Kiosk + network
+  const kiosk = h('div', { class: 'panel' });
+  kiosk.append(h('div', { class: 'panel-head' }, icon('monitor', 17), h('h3', {}, 'Wall Display / Kiosk')));
+  kiosk.append(h('div', { class: 'panel-body' },
+    h('p', { class: 'muted' }, 'Open the kiosk on any TV or spare monitor connected to the shop network. It rotates through the Today board, Schedule, Weapons and Notes and updates live as records change.'),
+    h('div', { class: 'setting-row' },
+      h('div', {}, h('div', { class: 'strong' }, 'Kiosk URL'), h('code', { class: 'path-text' }, kioskUrl())),
+      h('div', { class: 'row-actions' },
+        h('button', { class: 'btn ghost', onclick: () => { navigator.clipboard?.writeText(kioskUrl()); toast('Kiosk URL copied'); } }, icon('link', 16), 'Copy URL'),
+        h('button', { class: 'btn primary', onclick: () => window.open(kioskUrl(), '_blank') }, icon('external', 16), 'Open Kiosk'),
+      ),
+    ),
+    h('div', { class: 'setting-row' },
+      h('div', {}, h('div', { class: 'strong' }, 'Network address'), h('code', { class: 'path-text' }, location.origin)),
+      h('div', { class: 'row-actions' }, h('span', { class: 'muted small' }, 'Share this address with everyone on the shop LAN')),
+    ),
+    h('div', { class: 'setting-row' },
+      h('div', {}, h('div', { class: 'strong' }, 'Board rotation'), h('div', { class: 'muted small' }, `Views: ${s.kioskViews} · every ${s.rotateSeconds}s`)),
+    ),
+  ));
+  body.append(kiosk);
+
+  // Identity
+  const me = h('div', { class: 'panel' });
+  me.append(h('div', { class: 'panel-head' }, icon('people', 17), h('h3', {}, 'Your Name (for the activity log)')));
+  const nameInput = h('input', { class: 'input', value: getActor(), placeholder: 'e.g. SGT Ruiz' });
+  me.append(h('div', { class: 'panel-body' },
+    h('label', { class: 'field full' }, h('span', { class: 'field-label' }, 'Signed in as'), nameInput),
+  ));
+  me.append(h('div', { class: 'panel-foot' }, h('button', { class: 'btn primary', onclick: () => { setActor(nameInput.value.trim()); toast('Name saved'); } }, icon('save', 16), 'Save Name')));
+  body.append(me);
+
+  // Equipment types
+  const eq = h('div', { class: 'panel' });
+  eq.append(h('div', { class: 'panel-head' }, icon('tag', 17), h('h3', {}, 'Equipment Types'),
+    h('span', { class: 'spacer' }), h('span', { class: 'muted small' }, 'suggestions in the appointment form')));
+  const eqInput = h('input', { class: 'input', placeholder: 'New type — e.g. Generator' });
+  const eqList = h('div', { class: 'eqtype-list' });
+  const renderEqList = () => {
+    clear(eqList);
+    const types = [...store.col('eqtypes')].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    if (!types.length) eqList.append(h('span', { class: 'muted small' }, 'No types yet — free text still works in the form.'));
+    for (const t of types) {
+      eqList.append(h('span', { class: 'eqtype-chip' },
+        t.name,
+        iconButton('x', async () => { await store.remove('eqtypes', t.id); toast('Removed'); renderEqList(); }, 'Remove type', 'tiny danger-hover'),
+      ));
+    }
+  };
+  eq.append(h('div', { class: 'panel-body' },
+    h('div', { class: 'toolbar' },
+      h('div', { class: 'toolbar-left' },
+        h('span', { class: 'search-wrap' }, icon('tag', 16), eqInput),
+        h('button', {
+          class: 'btn primary', onclick: async () => {
+            const name = eqInput.value.trim();
+            if (!name) return;
+            const dupe = store.col('eqtypes').some((t) => t.name.toLowerCase() === name.toLowerCase());
+            if (dupe) { toast('That type already exists', 'error'); return; }
+            await store.save('eqtypes', null, { name });
+            toast(`Added ${name}`);
+            eqInput.value = '';
+            renderEqList();
+          },
+        }, icon('plus', 16), 'Add'),
+      ),
+    ),
+    h('div', { class: 'eqtype-wrap' }, eqList),
+  ));
+  renderEqList();
+  body.append(eq);
+
+  // Data & backups
+  const data = h('div', { class: 'panel' });
+  data.append(h('div', { class: 'panel-head' }, icon('box', 17), h('h3', {}, 'Data & Backups')));
+  const fileInput = h('input', { type: 'file', accept: 'application/json', style: { display: 'none' }, onchange: async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (await confirmDialog({ title: 'Restore backup?', message: 'This replaces ALL current data with the contents of the file.', confirmLabel: 'Restore' })) {
+        await store.restoreBackup(parsed);
+        toast('Backup restored');
+        ctx.rerender();
+      }
+    } catch (err) {
+      toast('Could not read backup: ' + err.message, 'error');
+    }
+    e.target.value = '';
+  } });
+
+  // Legacy CSV import (from the old Streamlit tracker)
+  const csvInput = h('input', { type: 'file', accept: '.csv,text/csv', multiple: true, style: { display: 'none' }, onchange: async (e) => {
+    const files = [...e.target.files];
+    e.target.value = '';
+    if (!files.length) return;
+    const texts = [];
+    for (const f of files) texts.push({ name: f.name, text: await f.text() });
+    let payload;
+    try { payload = importLegacyCsvFiles(texts); } catch (err) { toast('Import failed: ' + err.message, 'error'); return; }
+    const total = payload.appointments.length + payload.weapons.length + payload.notes.length;
+    if (!total) { toast('No recognizable rows found (expected equipment.csv, weapons.csv or shop_notes.csv)', 'error'); return; }
+    const summary = `${payload.appointments.length} appointments, ${payload.weapons.length} weapon type${payload.weapons.length === 1 ? '' : 's'}, ${payload.notes.length} note${payload.notes.length === 1 ? '' : 's'}. Units are created from the CSV automatically. Existing records are kept.`;
+    const warn = payload.warnings.length ? ` Warnings: ${payload.warnings.slice(0, 3).join(' | ')}` : '';
+    if (!(await confirmDialog({ title: 'Import legacy data?', message: summary + warn, confirmLabel: 'Import' }))) return;
+    try {
+      for (const w of payload.weapons) await store.save('weapons', null, w);
+      for (const n of payload.notes) await store.save('notes', null, n);
+      for (const a of payload.appointments) await store.save('appointments', null, a);
+      await store.refresh();
+      toast(`Imported ${total} records`);
+      ctx.rerender();
+    } catch (err) {
+      toast('Import failed: ' + err.message, 'error');
+    }
+  } });
+
+  data.append(h('div', { class: 'panel-body' },
+    h('div', { class: 'setting-row' },
+      h('div', {},
+        h('div', { class: 'strong' }, 'Storage'),
+        h('div', { class: 'muted small' }, store.mode === 'browser'
+          ? 'Browser mode — opened as a file, so records are saved in this browser (localStorage). Run "node server.js" and open it over the network to share data live between shop screens.'
+          : 'Server mode — records are shared live with every connected screen and stored in data/db.json on the host.'),
+      ),
+      h('div', { class: 'row-actions' }, h('span', { class: 'chip', style: { '--chip': store.mode === 'browser' ? '#f59e0b' : '#22c55e' } }, store.mode === 'browser' ? 'THIS BROWSER' : 'LIVE SERVER')),
+    ),
+    h('p', { class: 'muted' }, 'Everything is stored in a single place (data/db.json on the host, or this browser in file mode). Download a backup any time, or restore one to move the shop to a new machine.'),
+    h('div', { class: 'row-actions' },
+      h('button', { class: 'btn ghost', onclick: async () => {
+        download(`shop-ops-backup-${todayIso()}.json`, store.backupJson());
+        toast('Backup downloaded');
+      } }, icon('download', 16), 'Download backup'),
+      h('button', { class: 'btn ghost', onclick: () => fileInput.click() }, icon('upload', 16), 'Restore backup'),
+      fileInput,
+    ),
+    h('div', { class: 'setting-row' },
+      h('div', {},
+        h('div', { class: 'strong' }, 'Import from the old Streamlit tracker'),
+        h('div', { class: 'muted small' }, 'Select equipment.csv, weapons.csv and/or shop_notes.csv. Units and appointments are rebuilt automatically (Incoming → Drop-off, Outgoing → Pickup).'),
+      ),
+      h('div', { class: 'row-actions' },
+        h('button', { class: 'btn ghost', onclick: () => csvInput.click() }, icon('upload', 16), 'Import CSVs'),
+        csvInput,
+      ),
+    ),
+    h('div', { class: 'setting-row' },
+      h('div', {},
+        h('div', { class: 'strong' }, 'Clear all data'),
+        h('div', { class: 'muted small' }, 'Remove every appointment, unit, weapon and note and start fresh. Equipment-type suggestions are kept.'),
+      ),
+      h('div', { class: 'row-actions' },
+        h('button', {
+          class: 'btn danger ghost-soft',
+          onclick: async () => {
+            if (await confirmDialog({ title: 'Clear all data?', message: 'Every appointment, unit, weapon and note will be removed. This cannot be undone.', confirmLabel: 'Clear everything' })) {
+              await store.clearAll();
+              toast('All data cleared');
+              ctx.rerender();
+            }
+          },
+        }, icon('trash', 16), 'Clear all data'),
+      ),
+    ),
+    h('p', { class: 'muted small' }, `${Object.values(store.state.collections).reduce((n, list) => n + list.length, 0)} records · last synced ${relTime(store.state.lastSync?.toISOString())}`),
+  ));
+  body.append(data);
+
+  root.append(body);
+  return root;
+}
+
+function controlForSettings(field, value) {
+  const input = fieldControl(field, value);
+  if (field.type === TYPES.BOOL) {
+    input.querySelector('input').setAttribute('name', field.key);
+    return input;
+  }
+  input.setAttribute('name', field.key);
+  return input;
+}
+  return { boardView, appointmentsView, weaponsView, notesView, overviewView, collectionView, activityView, settingsView };
+})();
+
+// ═══════════════ js/app.js ═══════════════
+const __mod_js_app_js = (() => {
+  if (document.getElementById('content') && !document.getElementById('kiosk')) {
+  const { h, append, clear, debounce, fmtDateShort, relTime, daysUntil, todayIso, shiftDays, kioskUrl } = __mod_js_util_js;
+  const { icon } = __mod_js_icons_js;
+  const { collections, collectionByName, computeFields, itemSummary, titleOf } = __mod_shared_schema_js;
+  const store = __mod_js_store_js;
+  const { openForm, toast, statusChip } = __mod_js_components_js;
+  const { overviewView, boardView, appointmentsView, weaponsView, notesView, collectionView, activityView, settingsView } = __mod_js_views_js;
+// Application shell: navigation, hash routing, global search, theme, and the
+// render loop that re-draws the active view whenever the store changes.
+
+const NAV = [
+  { id: 'board', label: 'Daily Board', icon: 'grid' },
+  { id: 'schedule', label: 'Schedule', icon: 'calendar' },
+  { id: 'weapons', label: 'Weapons', icon: 'target' },
+  { id: 'notes', label: 'Shop Notes', icon: 'note' },
+  { id: 'units', label: 'Units', icon: 'people' },
+  { id: 'overview', label: 'Overview', icon: 'dashboard' },
+  { id: 'activity', label: 'Activity', icon: 'activity' },
+  { id: 'settings', label: 'Settings', icon: 'settings' },
+];
+
+const CONTENT = document.getElementById('content');
+const SIDEBAR = document.getElementById('sidebar');
+const SEARCH_RESULTS = document.getElementById('search-results');
+
+const ctx = {
+  view: 'board',
+  ui: {},
+  pendingFocus: null,
+  rerender: () => render(),
+  navigate,
+  focusRecord,
+};
+
+let pendingRender = false;
+
+function parseHash() {
+  const raw = location.hash.replace(/^#\/?/, '');
+  const [view, ...rest] = raw.split('/');
+  return view || 'board';
+}
+
+function navigate(view, opts = {}) {
+  location.hash = `#/${view}`;
+  if (opts.focus) pendingFocusSet = opts.focus;
+  if (!location.hash.includes(view) || location.hash === `#/${view}`) render();
+}
+
+// focus request that survives until the next mount of that view
+let pendingFocusSet = null;
+function focusRecord(collection, id, mode) {
+  const u = ctx.ui[collection] || (ctx.ui[collection] = {});
+  if (mode) u.mode = mode;
+  u.focus = id;
+  pendingFocusSet = { collection, id };
+  if (parseHash() === collection) render();
+  else location.hash = `#/${collection}`;
+}
+
+function isEditing() {
+  const el = document.activeElement;
+  if (!el || !CONTENT.contains(el)) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || el.isContentEditable;
+}
+
+function render() {
+  if (isEditing()) {
+    pendingRender = true;
+    return;
+  }
+  pendingRender = false;
+  const view = parseHash();
+  ctx.view = view;
+
+  let node;
+  if (view === 'board') node = boardView(ctx);
+  else if (view === 'overview') node = overviewView(ctx);
+  else if (view === 'schedule' || view === 'appointments') node = appointmentsView(ctx);
+  else if (view === 'weapons') node = weaponsView(ctx);
+  else if (view === 'notes') node = notesView(ctx);
+  else if (view === 'activity') node = activityView(ctx);
+  else if (view === 'settings') node = settingsView(ctx);
+  else if (collectionByName[view]) node = collectionView(ctx, view);
+  else node = h('div', { class: 'view' }, h('div', { class: 'panel' }, h('p', {}, 'Not found.')));
+
+  clear(CONTENT);
+  CONTENT.append(node);
+  CONTENT.scrollTop = 0;
+  updateNav(view);
+  updateTopbar();
+  applyPendingFocus();
+}
+
+function applyPendingFocus() {
+  const target = pendingFocusSet || (ctx.ui[ctx.view]?.focus ? { collection: ctx.view, id: ctx.ui[ctx.view].focus } : null);
+  if (!target) return;
+  pendingFocusSet = null;
+  requestAnimationFrame(() => {
+    const el = CONTENT.querySelector(`[data-id="${target.id}"]`);
+    if (el) {
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 1800);
+    }
+  });
+}
+
+function updateNav(active) {
+  document.querySelectorAll('.nav-item').forEach((el) => {
+    el.classList.toggle('active', el.dataset.nav === active);
+  });
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function updateTopbar() {
+  const s = store.state.settings;
+  document.getElementById('shop-name').textContent = s.shopName || 'Shopline';
+  document.getElementById('shop-sub').textContent = s.shopSubtitle || '';
+
+  const dot = document.getElementById('conn-dot');
+  const label = document.getElementById('conn-label');
+  if (store.state.connected) {
+    dot.className = 'dot ok';
+    label.textContent = 'Live';
+  } else {
+    dot.className = 'dot bad';
+    label.textContent = 'Reconnecting…';
+  }
+  document.getElementById('last-sync').textContent = store.state.lastSync ? `synced ${relTime(store.state.lastSync.toISOString())}` : '';
+
+  // Sidebar badges
+  const appts = store.col('appointments').map((r) => ({ ...r, ...computeFields('appointments', r) }));
+  const today = todayIso();
+  const todays = appts.filter((r) => r.date === today && r.status !== 'Cancelled');
+  const overdue = appts.filter((r) => r.overdue).length;
+  setBadge('board', overdue || todays.length, overdue ? 'bad' : todays.length ? 'warn' : '');
+
+  const horizon = shiftDays(today, 7);
+  const week = appts.filter((r) => r.date >= today && r.date <= horizon && r.status !== 'Cancelled').length;
+  setBadge('schedule', week, '');
+
+  const weapons = store.col('weapons');
+  const armsTotal = weapons.reduce((n, w) => n + (Number(w.count) || 0), 0);
+  setBadge('weapons', armsTotal || weapons.length, weapons.length ? '' : 'warn');
+  setBadge('notes', store.col('notes').length, '');
+}
+
+function setBadge(id, count, tone) {
+  const item = document.querySelector(`.nav-item[data-nav="${id}"] .nav-badge`);
+  if (!item) return;
+  item.textContent = count ? String(count) : '';
+  item.className = `nav-badge ${count ? tone : ''}`;
+  item.style.display = count ? '' : 'none';
+}
+
+// ---- build chrome --------------------------------------------------------
+function buildSidebar() {
+  clear(SIDEBAR);
+  const brand = h('div', { class: 'brand' },
+    h('div', { class: 'brand-mark' }, icon('activity', 20)),
+    h('div', {}, h('div', { class: 'brand-name' }, 'Shop Ops'), h('div', { class: 'brand-tag' }, 'Appointments · Arms Room')),
+  );
+  SIDEBAR.append(brand);
+  const nav = h('nav', { class: 'nav' });
+  for (const item of NAV) {
+    nav.append(h('a', {
+      class: 'nav-item', href: `#/${item.id}`, dataset: { nav: item.id },
+      onclick: () => { document.getElementById('sidebar').classList.remove('open'); },
+    }, icon(item.icon, 18), h('span', {}, item.label), h('span', { class: 'nav-badge', style: { display: 'none' } })));
+  }
+  SIDEBAR.append(nav);
+  SIDEBAR.append(h('div', { class: 'sidebar-foot' },
+    h('div', { class: 'muted small' }, `Shop Ops v2.0 · ${store.mode === 'browser' ? 'browser storage' : 'live server'}`),
+    h('div', { class: 'muted small' }, 'Local · network-shared'),
+  ));
+}
+
+function buildTopbar() {
+  const topbar = document.getElementById('topbar');
+  clear(topbar);
+
+  const menuBtn = h('button', { class: 'icon-btn menu-btn', title: 'Menu', onclick: () => document.getElementById('sidebar').classList.toggle('open') }, icon('list', 20));
+
+  const titleWrap = h('div', { class: 'topbar-title' },
+    h('h1', { id: 'shop-name' }, 'Shopline'),
+    h('p', { id: 'shop-sub' }, ''),
+  );
+
+  const searchInput = h('input', {
+    class: 'input', type: 'search', placeholder: 'Search everything…', id: 'global-search',
+    oninput: debounce((e) => runSearch(e.target.value), 160),
+    onfocus: (e) => { if (e.target.value) runSearch(e.target.value); },
+  });
+  const searchWrap = h('div', { class: 'global-search' }, icon('search', 16), searchInput);
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.global-search')) clear(SEARCH_RESULTS);
+  });
+
+  const conn = h('div', { class: 'conn', title: 'Live sync status' },
+    h('span', { class: 'dot', id: 'conn-dot' }),
+    h('div', { class: 'conn-text' }, h('span', { id: 'conn-label' }, 'Connecting…'), h('span', { class: 'muted small', id: 'last-sync' }, '')),
+  );
+
+  const newBtn = h('button', { class: 'btn ghost', onclick: openNewMenu }, icon('plus', 16), 'New');
+  const kioskBtn = h('button', {
+    class: 'btn primary', title: 'Open the wall board (for a TV / spare monitor)',
+    onclick: () => window.open(kioskUrl(), '_blank'),
+  }, icon('monitor', 16), 'Kiosk');
+  const themeBtn = h('button', { class: 'icon-btn', title: 'Toggle theme', onclick: () => toggleTheme(themeBtn) },
+    icon(currentTheme() === 'light' ? 'sun' : 'moon', 18));
+
+  topbar.append(menuBtn, titleWrap, h('div', { class: 'spacer' }), searchWrap, conn, newBtn, kioskBtn, themeBtn);
+  topbar.append(SEARCH_RESULTS);
+}
+
+function openNewMenu() {
+  clear(SEARCH_RESULTS);
+  const menu = h('div', { class: 'popover' });
+  for (const c of collections) {
+    menu.append(h('button', { class: 'popover-item', onclick: () => { clear(SEARCH_RESULTS); openForm({ collection: c.name }); } },
+      icon(c.icon, 16), `New ${c.singular}`));
+  }
+  SEARCH_RESULTS.append(menu);
+}
+
+// ---- global search -------------------------------------------------------
+function runSearch(query) {
+  const q = query.trim().toLowerCase();
+  clear(SEARCH_RESULTS);
+  if (q.length < 2) return;
+  const results = [];
+  for (const c of collections) {
+    const meta = c;
+    for (const record of store.col(c.name)) {
+      const hay = [
+        titleOf(c.name, record),
+        ...meta.fields.filter((f) => f.type === 'text' || f.type === 'textarea' || f.type === 'items').map((f) => {
+          const v = record[f.key];
+          return f.type === 'items' ? itemSummary(v) : v;
+        }),
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (hay.includes(q)) results.push({ collection: c.name, record, label: titleOf(c.name, record) });
+    }
+  }
+  const panel = h('div', { class: 'search-panel' });
+  if (!results.length) panel.append(h('div', { class: 'search-empty' }, `No matches for "${query}"`));
+  for (const r of results.slice(0, 12)) {
+    const meta = collectionByName[r.collection];
+    panel.append(h('button', { class: 'search-hit', onclick: () => {
+      clear(SEARCH_RESULTS);
+      document.getElementById('global-search').value = '';
+      focusRecord(r.collection, r.record.id, r.record.status ? 'table' : undefined);
+    } },
+      icon(meta.icon, 16),
+      h('span', { class: 'hit-label' }, r.label),
+      h('span', { class: 'hit-type' }, meta.singular),
+    ));
+  }
+  if (results.length > 12) panel.append(h('div', { class: 'search-empty' }, `+${results.length - 12} more…`));
+  SEARCH_RESULTS.append(panel);
+}
+
+// ---- theme ---------------------------------------------------------------
+function currentTheme() {
+  return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+}
+
+function toggleTheme(button) {
+  const next = currentTheme() === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('shopline.theme', next);
+  button?.replaceChildren(icon(next === 'light' ? 'sun' : 'moon', 18));
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('shopline.theme') || 'dark';
+  document.documentElement.dataset.theme = saved;
+}
+
+// ---- boot ----------------------------------------------------------------
+function installErrorReporting() {
+  window.__shoplineErrors = window.__shoplineErrors || [];
+  window.addEventListener('error', (e) => {
+    window.__shoplineErrors.push(String(e.error?.stack || e.message));
+    console.error('[shopline]', e.error || e.message);
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    window.__shoplineErrors.push('unhandled: ' + String(e.reason?.stack || e.reason));
+    console.error('[shopline] unhandled rejection', e.reason);
+  });
+}
+
+async function boot() {
+  installErrorReporting();
+  initTheme();
+  buildSidebar();
+  buildTopbar();
+
+  store.subscribe(() => {
+    updateTopbar();
+    render();
+  });
+
+  window.addEventListener('hashchange', render);
+  document.addEventListener('focusout', () => {
+    setTimeout(() => {
+      if (pendingRender && !isEditing()) render();
+    }, 30);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !isEditing()) { e.preventDefault(); document.getElementById('global-search')?.focus(); }
+  });
+
+  try {
+    await store.load();
+    store.connect();
+  } catch (err) {
+    CONTENT.append(h('div', { class: 'panel' }, h('p', {}, 'Could not reach the server: ' + err.message)));
+  }
+  render();
+}
+
+boot();
+  }
+  return {  };
+})();
+
+// ═══════════════ js/display.js ═══════════════
+const __mod_js_display_js = (() => {
+  if (document.getElementById('kiosk')) {
+  const { h, append, clear, fmtDateShort, fmtDayStrip, relTime, daysUntil, todayIso, shiftDays } = __mod_js_util_js;
+  const { icon } = __mod_js_icons_js;
+  const { computeFields, COLORS, itemSummary, KIOSK_VIEWS } = __mod_shared_schema_js;
+  const store = __mod_js_store_js;
+// Wall display / kiosk. Rotates through live boards, updates over SSE, and
+// needs no interaction. Keys: ← → change board, Space pause, F fullscreen.
+
+const root = document.getElementById('kiosk');
+let views = ['board', 'schedule', 'weapons', 'notes'];
+let index = 0;
+let rotateSeconds = 14;
+let paused = false;
+let rotateTimer = null;
+
+const TITLES = KIOSK_VIEWS;
+
+store.subscribe((event) => {
+  if (event.type === 'settings' || event.type === 'loaded') applySettings();
+  render();
+});
+
+function applySettings() {
+  const s = store.state.settings || {};
+  rotateSeconds = Math.max(4, Number(s.rotateSeconds) || 14);
+  if (typeof s.kioskViews === 'string' && s.kioskViews.trim()) {
+    views = s.kioskViews.split(',').map((v) => v.trim()).filter((v) => TITLES[v]);
+    if (!views.length) views = ['board'];
+    if (index >= views.length) index = 0;
+  }
+  restartTimer();
+}
+
+function restartTimer() {
+  clearInterval(rotateTimer);
+  rotateTimer = setInterval(() => { if (!paused) advance(1); }, rotateSeconds * 1000);
+}
+
+function advance(dir) {
+  index = (index + dir + views.length) % views.length;
+  render();
+}
+
+function render() {
+  clear(root);
+  const s = store.state.settings || {};
+  const current = views[index] || 'board';
+
+  // Header
+  const clock = h('div', { class: 'kiosk-clock', id: 'kiosk-clock' }, timeString());
+  const header = h('header', { class: 'kiosk-header' },
+    h('div', { class: 'kiosk-brand' },
+      h('span', { class: 'kiosk-logo' }, icon('activity', 30)),
+      h('div', {},
+        h('div', { class: 'kiosk-shop' }, s.shopName || 'Shop Ops'),
+        h('div', { class: 'kiosk-sub' }, s.shopSubtitle || ''),
+      ),
+    ),
+    h('div', { class: 'kiosk-center' },
+      h('div', { class: 'kiosk-view-title' }, TITLES[current]),
+      h('div', { class: 'kiosk-dots' }, views.map((v, i) => h('span', { class: `kdot ${i === index ? 'on' : ''}`, title: TITLES[v], onclick: () => { index = i; render(); } }))),
+    ),
+    h('div', { class: 'kiosk-right' },
+      clock,
+      h('div', { class: 'kiosk-date' }, new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })),
+      h('div', { class: `kiosk-live ${store.state.connected ? 'ok' : 'bad'}` }, h('span', { class: 'dot' }), store.state.connected ? 'LIVE' : 'RECONNECTING'),
+    ),
+  );
+
+  const body = h('main', { class: 'kiosk-main' }, VIEWS[current]());
+
+  const ticker = h('footer', { class: 'kiosk-ticker' },
+    h('span', { class: 'ticker-label' }, 'ACTIVITY'),
+    h('div', { class: 'ticker-track' },
+      h('div', { class: 'ticker-run' },
+        ...store.state.activity.slice(0, 8).map((a) => h('span', { class: 'ticker-item' }, `${a.text} · ${relTime(a.at)}`)),
+      ),
+    ),
+  );
+
+  append(root, [header, body, ticker]);
+}
+
+// ---- clock ---------------------------------------------------------------
+function timeString() {
+  return new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+setInterval(() => {
+  const clock = document.getElementById('kiosk-clock');
+  if (clock) clock.textContent = timeString();
+}, 1000);
+
+// ---- appointment helpers ---------------------------------------------------
+function withComputed() {
+  return store.col('appointments').map((r) => ({ ...r, ...computeFields('appointments', r) }));
+}
+
+function unitLabel(record) {
+  return record.unitName || store.label('units', record.unitId) || '—';
+}
+
+// ---- boards --------------------------------------------------------------
+const VIEWS = {
+  // The star of the wall: every open drop-off / pickup, on the board from the
+  // day it is scheduled until it is dropped off or picked up.
+  board() {
+    const today = todayIso();
+    const all = withComputed();
+    const open = all.filter((r) => r.status === 'Scheduled' || r.status === 'Arrived');
+    const byWhen = (a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
+    const inbound = open.filter((r) => r.direction === 'Drop-off').sort(byWhen);
+    const outbound = open.filter((r) => r.direction === 'Pickup').sort(byWhen);
+    const overdue = all.filter((r) => r.overdue);
+
+    const makeCol = (title, sub, dirIcon, cards) => {
+      const col = h('div', { class: 'k-col k-col2' },
+        h('div', { class: 'k-col-head', style: { '--chip': title === 'INBOUND' ? COLORS['Drop-off'] : COLORS['Pickup'] } },
+          h('span', {}, icon(dirIcon, 20), ' ', title),
+          h('span', { class: 'k-count' }, cards.length),
+        ),
+        h('div', { class: 'k-col-sub' }, sub),
+      );
+      const shown = cards.slice(0, 8);
+      for (const r of shown) {
+        const card = h('div', { class: `k-appt ${r.overdue ? 'bad' : ''}` },
+          h('div', { class: 'k-appt-top' },
+            h('span', { class: 'k-appt-time mono-time' }, r.time),
+            h('span', { class: 'k-chip', style: { '--chip': COLORS[r.direction] } }, r.direction),
+            h('span', { class: 'k-chip', style: { '--chip': COLORS[r.status] } }, r.status),
+            r.date !== today ? h('span', { class: 'k-appt-date' }, fmtDateShort(r.date)) : null,
+          ),
+          h('div', { class: 'k-appt-unit' }, unitLabel(r)),
+          r.items?.length ? h('div', { class: 'k-appt-items' },
+            ...r.items.slice(0, 3).map((it) => h('div', {}, h('b', {}, `${it.qty}×`), ` ${it.eqType}${it.description ? ' — ' + it.description : ''}`)),
+            r.items.length > 3 ? h('div', { class: 'muted' }, `+${r.items.length - 3} more lines`) : null,
+          ) : null,
+          r.notes ? h('div', { class: 'k-appt-notes' }, r.notes) : null,
+        );
+        col.append(card);
+      }
+      if (!shown.length) col.append(h('div', { class: 'k-more' }, title === 'INBOUND' ? 'No open drop-offs right now.' : 'No open pickups right now.'));
+      if (cards.length > shown.length) col.append(h('div', { class: 'k-more' }, `+${cards.length - shown.length} more`));
+      return col;
+    };
+
+    const wrap = h('div', { class: 'k-board2' });
+    wrap.append(makeCol('INBOUND', 'scheduled & open until dropped off', 'arrowdown', inbound));
+    wrap.append(makeCol('OUTBOUND', 'scheduled & open until picked up', 'arrowup', outbound));
+    if (overdue.length) {
+      wrap.append(h('div', { class: 'k-overdue-bar' },
+        icon('alert', 20),
+        `${overdue.length} OVERDUE — still scheduled from earlier days: ${overdue.slice(0, 4).map((r) => `${unitLabel(r)} (${fmtDateShort(r.date)})`).join(' · ')}`,
+      ));
+    }
+    return wrap;
+  },
+
+  // Next seven days.
+  schedule() {
+    const today = todayIso();
+    const horizon = shiftDays(today, 7);
+    const all = withComputed()
+      .filter((r) => r.date >= today && r.date <= horizon && r.status !== 'Cancelled')
+      .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+    const list = h('ul', { class: 'k-list big' });
+    let lastDate = '';
+    for (const r of all.slice(0, 18)) {
+      if (r.date !== lastDate) {
+        lastDate = r.date;
+        list.append(h('li', { class: 'k-day-row' }, fmtDayStrip(r.date), r.date === today ? ' · TODAY' : ''));
+      }
+      const dirIcon = r.direction === 'Drop-off' ? 'arrowdown' : 'arrowup';
+      list.append(h('li', { class: `k-row ${r.overdue ? 'bad' : r.date === today ? '' : ''}` },
+        h('span', { class: 'k-date mono-time' }, r.time),
+        h('span', { class: 'k-chip', style: { '--chip': COLORS[r.direction] } }, icon(dirIcon, 14), ' ', r.direction),
+        h('div', { class: 'k-row-body' },
+          h('div', { class: 'k-row-title' }, unitLabel(r)),
+          h('div', { class: 'k-row-sub' }, itemSummary(r.items) || 'No equipment listed'),
+        ),
+        h('div', { class: 'k-row-owner' }, r.status),
+      ));
+    }
+    if (!all.length) list.append(h('li', { class: 'k-row' }, h('div', { class: 'k-row-title muted' }, 'Nothing scheduled this week.')));
+    return h('div', { class: 'k-panel wide' },
+      h('div', { class: 'k-panel-head' }, icon('calendar', 24), `Next 7 days (${all.length})`),
+      list,
+    );
+  },
+
+  // Arms-room inventory.
+  weapons() {
+    const weapons = [...store.col('weapons')]
+      .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0));
+    const total = weapons.reduce((n, w) => n + (Number(w.count) || 0), 0);
+    return h('div', { class: 'k-weapons' },
+      h('div', { class: 'k-weapon-total' },
+        h('div', { class: 'k-weapon-total-value' }, String(total)),
+        h('div', { class: 'k-weapon-total-label' }, 'TOTAL ON HAND'),
+      ),
+      weapons.map((w) => h('div', { class: 'k-weapon' },
+        h('div', { class: 'k-weapon-name' }, icon('target', 18), ' ', w.name),
+        h('div', { class: 'k-weapon-count' }, String(Number(w.count) || 0)),
+        w.notes ? h('div', { class: 'k-weapon-notes' }, w.notes) : null,
+      )),
+      !weapons.length ? h('div', { class: 'k-more' }, 'No weapon types tracked yet.') : null,
+    );
+  },
+
+  // Shop notes pass-down board.
+  notes() {
+    const notes = store.col('notes').slice(0, 12);
+    return h('div', { class: 'k-panel wide' },
+      h('div', { class: 'k-panel-head' }, icon('note', 24), `Shop Notes (${store.col('notes').length})`),
+      h('ul', { class: 'k-list big k-notes' }, notes.map((n, i) => h('li', { class: 'k-row' },
+        h('span', { class: 'k-note-num' }, String(i + 1)),
+        h('div', { class: 'k-row-body' },
+          h('div', { class: 'k-note-text' }, n.message),
+          h('div', { class: 'k-row-sub' }, relTime(n.createdAt)),
+        ),
+      ))),
+      !notes.length ? h('div', { class: 'k-more' }, 'No notes posted.') : null,
+    );
+  },
+
+  // Compact overview: numbers + attention list.
+  overview() {
+    const all = withComputed();
+    const today = todayIso();
+    const day = all.filter((r) => r.date === today && r.status !== 'Cancelled');
+    const inbound = day.filter((r) => r.direction === 'Drop-off').reduce((n, r) => n + r.totalQty, 0);
+    const outbound = day.filter((r) => r.direction === 'Pickup').reduce((n, r) => n + r.totalQty, 0);
+    const overdue = all.filter((r) => r.overdue);
+    const noShows = all.filter((r) => r.status === 'No-show');
+    const weapons = store.col('weapons');
+    const armsTotal = weapons.reduce((n, w) => n + (Number(w.count) || 0), 0);
+
+    const tiles = h('div', { class: 'k-tiles k-tiles-6' },
+      kTile("Today's Appts", day.length, 'accent'),
+      kTile('Inbound Items', inbound, ''),
+      kTile('Outbound Items', outbound, ''),
+      kTile('Overdue', overdue.length, overdue.length ? 'bad' : ''),
+      kTile('Weapons On Hand', armsTotal, ''),
+      kTile('Weapon Types', weapons.length, ''),
+    );
+
+    const rows = [
+      ...overdue.slice(0, 6).map((r) => ({ tone: 'bad', title: `${unitLabel(r)} — ${r.direction}`, sub: `${fmtDateShort(r.date)} ${r.time} · ${itemSummary(r.items) || 'no items'}` })),
+      ...noShows.slice(0, 4).map((r) => ({ tone: 'warn', title: `${unitLabel(r)} — no-show`, sub: `${fmtDateShort(r.date)} ${r.time} · reschedule?` })),
+      ...weapons.slice(0, 3).map((w) => ({ tone: '', title: w.name, sub: `${w.count} on hand`, owner: '' })),
+    ].slice(0, 9);
+
+    const attention = h('div', { class: 'k-panel' },
+      h('div', { class: 'k-panel-head' }, icon('alert', 24), 'Attention Needed'),
+      h('ul', { class: 'k-list' },
+        ...rows.map((row) => h('li', { class: `k-row ${row.tone}` },
+          h('span', { class: `pulse ${row.tone}` }),
+          h('div', { class: 'k-row-body' }, h('div', { class: 'k-row-title' }, row.title), h('div', { class: 'k-row-sub' }, row.sub)),
+          h('div', { class: 'k-row-owner' }, row.owner || ''),
+        ))),
+      (!overdue.length && !noShows.length)
+        ? h('li', { class: 'k-row ok' }, icon('check', 22), h('div', { class: 'k-row-title' }, 'All clear — every appointment handled'))
+        : null,
+    );
+
+    return h('div', { class: 'k-overview' }, tiles, attention);
+  },
+};
+
+function kTile(label, value, tone) {
+  return h('div', { class: `k-tile ${tone}` }, h('div', { class: 'k-tile-value' }, String(value)), h('div', { class: 'k-tile-label' }, label));
+}
+
+// ---- controls ------------------------------------------------------------
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') advance(1);
+  else if (e.key === 'ArrowLeft') advance(-1);
+  else if (e.key === ' ') { e.preventDefault(); paused = !paused; render(); }
+  else if (e.key.toLowerCase() === 'f') {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen?.();
+  }
+});
+
+(async function start() {
+  window.__shoplineErrors = [];
+  window.addEventListener('error', (e) => window.__shoplineErrors.push(String(e.error?.stack || e.message)));
+  window.addEventListener('unhandledrejection', (e) => window.__shoplineErrors.push('unhandled: ' + String(e.reason?.stack || e.reason)));
+  try {
+    await store.load();
+    applySettings();
+    store.connect();
+    render();
+  } catch (err) {
+    root.innerHTML = '';
+    append(root, [h('div', { class: 'kiosk-loading' }, 'Cannot reach the server: ' + err.message)]);
+  }
+})();
+  }
+  return {  };
+})();
+
+  </script>
+</body>
+</html>
