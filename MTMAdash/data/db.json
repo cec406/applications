@@ -1,0 +1,327 @@
+{
+  "meta": {
+    "version": 1,
+    "seededAt": "2026-10-12T17:36:36.374Z",
+    "updatedAt": "2026-10-12T18:53:57.384Z"
+  },
+  "settings": {
+    "shopName": "Shop Ops",
+    "shopSubtitle": "Drop-off & Pickup · Arms Room · Shop Notes",
+    "rotateSeconds": 14,
+    "kioskViews": "board,schedule,weapons,notes"
+  },
+  "units": [
+    {
+      "id": "unit-a",
+      "name": "A/2-1 IN",
+      "poc": "SGT Ruiz",
+      "phone": "kx 2105",
+      "notes": "Turn-ins usually Tue/Thu mornings."
+    },
+    {
+      "id": "unit-b",
+      "name": "B/2-1 IN",
+      "poc": "SSG Calloway",
+      "phone": "kx 2210",
+      "notes": ""
+    },
+    {
+      "id": "unit-hhc",
+      "name": "HHC",
+      "poc": "SFC Delgado",
+      "phone": "kx 2001",
+      "notes": ""
+    },
+    {
+      "id": "unit-ccc",
+      "name": "C/2-1 IN",
+      "poc": "SPD Vance",
+      "phone": "kx 2318",
+      "notes": "Draws comms gear ahead of JRTC."
+    }
+  ],
+  "eqtypes": [
+    "Generator",
+    "Radio",
+    "Optic",
+    "Weapon Case",
+    "Vehicle Kit",
+    "Computer",
+    "Tool Kit",
+    "Comms",
+    "Tent",
+    "Water Buffalo",
+    "Night Vision"
+  ],
+  "appointments": [
+    {
+      "id": "apt-t0uscc",
+      "date": "2026-10-10",
+      "time": "10:00",
+      "unitId": "unit-hhc",
+      "direction": "Drop-off",
+      "status": "Completed",
+      "items": [
+        {
+          "eqType": "Computer",
+          "qty": 2,
+          "description": "Ruggedized laptops — reimage"
+        }
+      ],
+      "poc": "SFC Delgado",
+      "notes": "",
+      "unitName": "HHC"
+    },
+    {
+      "id": "apt-x6ikpv",
+      "date": "2026-10-11",
+      "time": "07:30",
+      "unitId": "unit-a",
+      "direction": "Drop-off",
+      "status": "Completed",
+      "items": [
+        {
+          "eqType": "Generator",
+          "qty": 2,
+          "description": "MEP-803A #3, #7"
+        },
+        {
+          "eqType": "Tool Kit",
+          "qty": 1,
+          "description": "No. 1 common — missing 9mm socket"
+        }
+      ],
+      "poc": "SGT Ruiz",
+      "notes": "Generator #7 has fuel leak — parts ordered.",
+      "unitName": "A/2-1 IN"
+    },
+    {
+      "id": "apt-xzu9os",
+      "date": "2026-10-11",
+      "time": "16:00",
+      "unitId": "unit-ccc",
+      "direction": "Pickup",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Radio",
+          "qty": 3,
+          "description": "ASIP — COMSEC attached"
+        }
+      ],
+      "poc": "SPD Vance",
+      "notes": "",
+      "unitName": "C/2-1 IN"
+    },
+    {
+      "id": "apt-up2euv",
+      "date": "2026-10-12",
+      "time": "07:30",
+      "unitId": "unit-a",
+      "direction": "Drop-off",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Generator",
+          "qty": 1,
+          "description": "MEP-831B — 400Hz fault"
+        },
+        {
+          "eqType": "Vehicle Kit",
+          "qty": 1,
+          "description": "M1152 tool kit, lost jack"
+        }
+      ],
+      "poc": "SGT Ruiz",
+      "notes": "Gate pass filed under MTM-0117.",
+      "unitName": "A/2-1 IN"
+    },
+    {
+      "id": "apt-srhfks",
+      "date": "2026-10-12",
+      "time": "09:00",
+      "unitId": "unit-b",
+      "direction": "Pickup",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Optic",
+          "qty": 4,
+          "description": "TA31ECOS — zero confirmation done"
+        },
+        {
+          "eqType": "Weapon Case",
+          "qty": 2,
+          "description": ""
+        }
+      ],
+      "poc": "SSG Calloway",
+      "notes": "Bring DD Form 314s.",
+      "unitName": "B/2-1 IN"
+    },
+    {
+      "id": "apt-ykkxf0",
+      "date": "2026-10-12",
+      "time": "13:00",
+      "unitId": "unit-hhc",
+      "direction": "Pickup",
+      "status": "Arrived",
+      "items": [
+        {
+          "eqType": "Computer",
+          "qty": 2,
+          "description": "Ruggedized laptops — imaged"
+        }
+      ],
+      "poc": "SFC Delgado",
+      "notes": "",
+      "unitName": "HHC"
+    },
+    {
+      "id": "apt-qiwfb5",
+      "date": "2026-10-12",
+      "time": "15:30",
+      "unitId": "unit-ccc",
+      "direction": "Drop-off",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Comms",
+          "qty": 1,
+          "description": "JBCP Suite — annual PMCS"
+        },
+        {
+          "eqType": "Night Vision",
+          "qty": 6,
+          "description": "AN/PVS-14 — collimation check"
+        }
+      ],
+      "poc": "SPD Vance",
+      "notes": "JRTC draw — priority.",
+      "unitName": "C/2-1 IN"
+    },
+    {
+      "id": "apt-52g469",
+      "date": "2026-10-13",
+      "time": "08:00",
+      "unitId": "unit-b",
+      "direction": "Drop-off",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Generator",
+          "qty": 3,
+          "description": "TES subset — 100hr services"
+        }
+      ],
+      "poc": "SSG Calloway",
+      "notes": "",
+      "unitName": "B/2-1 IN"
+    },
+    {
+      "id": "apt-bve8p2",
+      "date": "2026-10-14",
+      "time": "10:30",
+      "unitId": "unit-a",
+      "direction": "Pickup",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Generator",
+          "qty": 2,
+          "description": "MEP-803A — fuel leak repaired"
+        }
+      ],
+      "poc": "SGT Ruiz",
+      "notes": "",
+      "unitName": "A/2-1 IN"
+    },
+    {
+      "id": "apt-wgdere",
+      "date": "2026-10-16",
+      "time": "09:00",
+      "unitId": "unit-hhc",
+      "direction": "Drop-off",
+      "status": "Scheduled",
+      "items": [
+        {
+          "eqType": "Tent",
+          "qty": 2,
+          "description": "GP Medium — zipper repair"
+        }
+      ],
+      "poc": "SFC Delgado",
+      "notes": "",
+      "unitName": "HHC"
+    }
+  ],
+  "weapons": [
+    {
+      "id": "wpn-xgc8ox",
+      "name": "M4 Carbine",
+      "count": 42,
+      "notes": "12 allocated to ranges this month."
+    },
+    {
+      "id": "wpn-bn0vki",
+      "name": "M17",
+      "count": 24,
+      "notes": ""
+    },
+    {
+      "id": "wpn-9da97t",
+      "name": "M249 SAW",
+      "count": 7,
+      "notes": "2 in transit to DS for barrel swap."
+    },
+    {
+      "id": "wpn-w7qq7x",
+      "name": "M240B",
+      "count": 9,
+      "notes": ""
+    },
+    {
+      "id": "wpn-b7g2ws",
+      "name": "M320",
+      "count": 12,
+      "notes": ""
+    },
+    {
+      "id": "wpn-2jxzqp",
+      "name": "M500 Shotgun",
+      "count": 4,
+      "notes": "Breacher set — secure cage."
+    },
+    {
+      "id": "wpn-lpfkeb",
+      "name": "M2A1 .50 CAL",
+      "count": 2,
+      "notes": "Scheduled for annual TM inspection."
+    }
+  ],
+  "notes": [
+    {
+      "message": "Range 12 closed Friday 0800–1600 — no scheduled draws that day."
+    },
+    {
+      "message": "Turn-in NCO this week: SGT Ruiz (kx 2105)."
+    },
+    {
+      "message": "Generator PM services due before FLRX — see the 2404 log in the binder."
+    },
+    {
+      "message": "Keys signed out: CPT Nguyen ×2 — due back Friday COB."
+    },
+    {
+      "message": "GSA arms room inspection window: two weeks out. Ensure all weapon cards updated."
+    }
+  ],
+  "activity": [
+    {
+      "id": "act-g9rlff",
+      "at": "2026-10-12T17:36:36.374Z",
+      "actor": "system",
+      "text": "Database seeded with sample shop data"
+    }
+  ]
+}

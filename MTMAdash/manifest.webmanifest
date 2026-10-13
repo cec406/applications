@@ -1,0 +1,12 @@
+{
+  "name": "Shop Ops Dashboard",
+  "short_name": "Shop Ops",
+  "description": "Locally hosted shop dashboard - appointments for drop-offs and pickups by unit and equipment type, weapons counts by type, shop notes, and a live wall board.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
