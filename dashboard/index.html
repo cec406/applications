@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Montana Fleet Solutions LLC — construction equipment fleet maintenance and repair." />
+  <meta name="theme-color" content="#0b1120" />
+  <title>Montana Fleet Solutions LLC · Fleet Maintenance</title>
+  <link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="./public/manifest.webmanifest" />
+  <link rel="stylesheet" href="./public/css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside id="sidebar" class="sidebar"></aside>
+    <div class="main">
+      <header id="topbar" class="topbar"></header>
+      <main id="content" class="content"></main>
+    </div>
+  </div>
+
+  <div id="search-results" class="search-results" role="listbox"></div>
+
+  <!-- The module itself lives under public/, so its relative imports still
+       resolve correctly when this root shell is hosted at /dashboard/. -->
+  <script type="module" src="./public/js/app.js?v=20261012-3"></script>
+</body>
+</html>

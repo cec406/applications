@@ -1,0 +1,24 @@
+# Shopline — run the published container image.
+#
+#   docker compose up -d
+#   docker compose logs -f
+#   docker compose down
+#
+# Data is kept in the named volume `shopline-data`, so `down`/`up` never loses
+# records. To wipe everything: docker compose down -v
+services:
+  shopline:
+    image: ghcr.io/cec406/shopline:latest
+    container_name: shopline
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    environment:
+      PORT: "4321"
+      HOST: "0.0.0.0"
+      DATA_FILE: /app/data/db.json
+    volumes:
+      - shopline-data:/app/data
+
+volumes:
+  shopline-data:

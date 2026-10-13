@@ -1,0 +1,38 @@
+# Shopline — Docker Compose deployment
+# ------------------------------------
+# From the project root:
+#
+#   docker compose -f container/docker-compose.yml up -d --build
+#
+# Then open:
+#   http://localhost:4321            (this machine)
+#   http://<host-ip>:4321            (any device on the shop network)
+#   http://<host-ip>:4321/display    (the wall TV / kiosk board)
+#
+# Data is stored in the named volume "shopline-data" and is kept across
+# restarts, rebuilds and upgrades.
+services:
+  shopline:
+    build:
+      context: ..
+      dockerfile: container/Dockerfile
+    image: shopline:local
+    container_name: shopline
+    restart: unless-stopped
+    ports:
+      # host:container — change the left side (or set SHOPLINE_PORT) to expose
+      # Shopline on a different host port.
+      - "${SHOPLINE_PORT:-4321}:4321"
+    environment:
+      PORT: "4321"
+    volumes:
+      - shopline-data:/app/data
+      # Prefer a folder you can see and back up directly? Comment out the
+      # named-volume line above, uncomment the bind mount below, and create it:
+      #
+      #   mkdir -p ./data && sudo chown -R 1000:1000 ./data
+      #
+      # - ./data:/app/data
+
+volumes:
+  shopline-data:

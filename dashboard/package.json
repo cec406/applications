@@ -1,0 +1,17 @@
+{
+  "name": "shopline-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shopline - a locally hosted, editable maintenance dashboard for shops. Tracks work orders, assets, schedules, parts, people, vendors and network resources, with a live kiosk board for wall displays.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --experimental-vm-modules --test tests/",
+    "reset": "node -e \"import('node:fs').then(fs=>{try{fs.rmSync('data/db.json')}catch{};console.log('Database reset. It will be re-seeded on next start.')})\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
