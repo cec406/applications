@@ -414,7 +414,7 @@ export function dataTable({ collection, items, sort, onSort, rowClass, extraActi
     actions.append(
       iconButton('edit', () => openForm({ collection, record }), 'Edit'),
       iconButton('trash', async () => {
-        if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: `"${record[meta.primary]}" will be removed.` })) {
+        if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: `"${titleOf(collection, record)}" will be removed.` })) {
           await store.remove(collection, record.id);
           toast('Deleted');
         }

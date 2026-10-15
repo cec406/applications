@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#0b1120" />
   <title>Shop Ops · Dashboard</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230f172a%22%2F%3E%20%3Cpath%20d%3D%22M7%2020l4-9%204%209%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Cpath%20d%3D%22M17%2011v9%22%20stroke%3D%22%23f59e0b%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%20%3Ccircle%20cx%3D%2223%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22none%22%20stroke%3D%22%2322c55e%22%20stroke-width%3D%222.4%22%2F%3E%20%3C%2Fsvg%3E" type="image/svg+xml" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0D%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%230f172a%22%2F%3E%0D%20%3Cpath%20d%3D%22M7%2020l4-9%204%209%22%20fill%3D%22none%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0D%20%3Cpath%20d%3D%22M17%2011v9%22%20stroke%3D%22%23f59e0b%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%2F%3E%0D%20%3Ccircle%20cx%3D%2223%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22none%22%20stroke%3D%22%2322c55e%22%20stroke-width%3D%222.4%22%2F%3E%0D%20%3C%2Fsvg%3E" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest" />
   <style>
 /* =========================================================================
@@ -72,7 +72,10 @@ button { font-family: inherit; }
 .inline-gap { display: inline-flex; align-items: center; gap: 8px; }
 
 /* ---------- app layout ---------- */
-.app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; overflow: hidden; }
+/* The row must be pinned to the viewport height (minmax(0, 1fr)); otherwise the
+   implicit row auto-sizes to its content on tall pages, grows past 100vh, and
+   overflow:hidden clips it - so the inner panes never scroll. */
+.app { display: grid; grid-template-columns: 248px 1fr; grid-template-rows: minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .main { display: flex; flex-direction: column; min-width: 0; }
 
 .sidebar {
@@ -2481,7 +2484,7 @@ function dataTable({ collection, items, sort, onSort, rowClass, extraActions, hi
     actions.append(
       iconButton('edit', () => openForm({ collection, record }), 'Edit'),
       iconButton('trash', async () => {
-        if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: `"${record[meta.primary]}" will be removed.` })) {
+        if (await confirmDialog({ title: `Delete ${meta.singular}?`, message: `"${titleOf(collection, record)}" will be removed.` })) {
           await store.remove(collection, record.id);
           toast('Deleted');
         }

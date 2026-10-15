@@ -61,7 +61,10 @@ button { font-family: inherit; }
 .inline-gap { display: inline-flex; align-items: center; gap: 8px; }
 
 /* ---------- app layout ---------- */
-.app { display: grid; grid-template-columns: 248px 1fr; height: 100vh; overflow: hidden; }
+/* The row must be pinned to the viewport height (minmax(0, 1fr)); otherwise the
+   implicit row auto-sizes to its content on tall pages, grows past 100vh, and
+   overflow:hidden clips it - so the inner panes never scroll. */
+.app { display: grid; grid-template-columns: 248px 1fr; grid-template-rows: minmax(0, 1fr); height: 100vh; overflow: hidden; }
 .main { display: flex; flex-direction: column; min-width: 0; }
 
 .sidebar {
